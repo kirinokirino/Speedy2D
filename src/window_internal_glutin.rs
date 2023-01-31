@@ -26,13 +26,19 @@ use glutin::event::{
     VirtualKeyCode as GlutinVirtualKeyCode,
     WindowEvent as GlutinWindowEvent
 };
-use glutin::event_loop::{ControlFlow, EventLoop, EventLoopBuilder, EventLoopClosed, EventLoopProxy};
+use glutin::event_loop::{
+    ControlFlow,
+    EventLoop,
+    EventLoopBuilder,
+    EventLoopClosed,
+    EventLoopProxy
+};
 use glutin::monitor::MonitorHandle;
 use glutin::window::{
+    CursorGrabMode,
     Icon,
     Window as GlutinWindow,
-    WindowBuilder as GlutinWindowBuilder,
-    CursorGrabMode,
+    WindowBuilder as GlutinWindowBuilder
 };
 
 use crate::dimen::{IVec2, UVec2, Vec2, Vector2};
@@ -155,7 +161,11 @@ impl<UserEventType> WindowHelperGlutin<UserEventType>
                 )
             })?;
 
-        match self.window_context.window().set_cursor_grab(CursorGrabMode::Confined) {
+        match self
+            .window_context
+            .window()
+            .set_cursor_grab(CursorGrabMode::Confined)
+        {
             Ok(_) => {
                 self.is_mouse_grabbed.set(grabbed);
                 if self

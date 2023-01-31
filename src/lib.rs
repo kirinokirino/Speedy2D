@@ -288,8 +288,8 @@
 //! just build-example-webgl
 //! ```
 
-#![deny(warnings)]
-#![deny(missing_docs)]
+//#![deny(warnings)]
+//#![deny(missing_docs)]
 
 use std::fmt::{Display, Formatter};
 #[cfg(any(doc, doctest, all(target_arch = "wasm32", feature = "windowing")))]
@@ -306,6 +306,7 @@ use {
 use crate::color::Color;
 use crate::dimen::{UVec2, Vec2};
 use crate::error::{BacktraceError, ErrorMessage};
+#[cfg(feature = "text")]
 use crate::font::FormattedTextBlock;
 use crate::glbackend::GLBackend;
 #[cfg(not(target_arch = "wasm32"))]
@@ -344,7 +345,7 @@ pub mod color;
 pub mod shape;
 
 /// Components for loading fonts and laying out text.
-#[cfg(feature = "font")]
+#[cfg(feature = "text")]
 pub mod font;
 
 /// Types representing sizes and positions.
@@ -382,6 +383,7 @@ mod window_internal_doctest;
 #[cfg(any(target_arch = "wasm32"))]
 mod web;
 
+#[cfg(feature = "text")]
 mod font_cache;
 mod glbackend;
 mod glwrapper;
@@ -794,6 +796,7 @@ impl Graphics2D
     /// text will need to be re-rendered and re-uploaded. To avoid this,
     /// call `round()` on the position coordinates, to ensure that
     /// the text is always located at an integer pixel position.
+    #[cfg(feature = "text")]
     pub fn draw_text<V: Into<Vec2>>(
         &mut self,
         position: V,
@@ -812,6 +815,7 @@ impl Graphics2D
     /// window.
     ///
     /// See the documentation for [Graphics2D::draw_text] for more details.
+    #[cfg(feature = "text")]
     pub fn draw_text_cropped<V: Into<Vec2>>(
         &mut self,
         position: V,

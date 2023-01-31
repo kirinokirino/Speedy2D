@@ -21,11 +21,14 @@ use std::rc::Rc;
 use backtrace::Backtrace;
 
 #[cfg(not(feature = "backtrace"))]
-struct Backtrace {}
+#[derive(Debug)]
+pub struct Backtrace {}
 
 #[cfg(not(feature = "backtrace"))]
-impl Backtrace {
-    pub fn new() -> Self {
+impl Backtrace
+{
+    pub fn new() -> Self
+    {
         Self {}
     }
 }

@@ -28,7 +28,9 @@ use {
 use crate::color::Color;
 use crate::dimen::{UVec2, Vec2};
 use crate::error::{BacktraceError, Context, ErrorMessage};
+#[cfg(feature = "text")]
 use crate::font::{FormattedGlyph, FormattedTextBlock};
+#[cfg(feature = "text")]
 use crate::font_cache::GlyphCache;
 use crate::glwrapper::*;
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode};
@@ -282,6 +284,7 @@ impl Renderer2DAction
 
 enum RenderQueueItem
 {
+    #[cfg(feature = "text")]
     FormattedTextBlock
     {
         position: Vec2,
@@ -289,6 +292,7 @@ enum RenderQueueItem
         block: Rc<FormattedTextBlock>
     },
 
+    #[cfg(feature = "text")]
     #[allow(dead_code)]
     FormattedTextGlyph
     {
@@ -322,6 +326,7 @@ enum RenderQueueItem
 
 impl RenderQueueItem
 {
+    #[cfg(feature = "text")]
     #[inline]
     fn generate_actions(
         &self,
@@ -330,6 +335,7 @@ impl RenderQueueItem
     )
     {
         match self {
+            #[cfg(feature = "text")]
             RenderQueueItem::FormattedTextBlock {
                 position,
                 color,
@@ -344,6 +350,138 @@ impl RenderQueueItem
                 }
             }
 
+            #[cfg(feature = "text")]
+            RenderQueueItem::FormattedTextGlyph {
+                glyph,
+                position,
+                color,
+                crop_window
+            } => {
+                glyph_cache.get_renderer2d_actions(
+                    glyph,
+                    *position,
+                    *color,
+                    Some(crop_window),
+                    runner
+                );
+            }
+
+            RenderQueueItem::CircleSectionColored {
+                vertex_positions_clockwise,
+                vertex_colors_clockwise,
+                vertex_normalized_circle_coords_clockwise
+            } => runner(Renderer2DAction {
+                texture: None,
+                vertices_clockwise: [
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[0],
+                        texture_coord: vertex_normalized_circle_coords_clockwise[0],
+                        color: vertex_colors_clockwise[0],
+                        texture_mix: 0.0,
+                        circle_mix: 1.0
+                    },
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[1],
+                        texture_coord: vertex_normalized_circle_coords_clockwise[1],
+                        color: vertex_colors_clockwise[1],
+                        texture_mix: 0.0,
+                        circle_mix: 1.0
+                    },
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[2],
+                        texture_coord: vertex_normalized_circle_coords_clockwise[2],
+                        color: vertex_colors_clockwise[2],
+                        texture_mix: 0.0,
+                        circle_mix: 1.0
+                    }
+                ]
+            }),
+
+            RenderQueueItem::TriangleColored {
+                vertex_positions_clockwise,
+                vertex_colors_clockwise
+            } => runner(Renderer2DAction {
+                texture: None,
+                vertices_clockwise: [
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[0],
+                        texture_coord: Vec2::ZERO,
+                        color: vertex_colors_clockwise[0],
+                        texture_mix: 0.0,
+                        circle_mix: 0.0
+                    },
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[1],
+                        texture_coord: Vec2::ZERO,
+                        color: vertex_colors_clockwise[1],
+                        texture_mix: 0.0,
+                        circle_mix: 0.0
+                    },
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[2],
+                        texture_coord: Vec2::ZERO,
+                        color: vertex_colors_clockwise[2],
+                        texture_mix: 0.0,
+                        circle_mix: 0.0
+                    }
+                ]
+            }),
+
+            RenderQueueItem::TriangleTextured {
+                vertex_positions_clockwise,
+                vertex_colors_clockwise,
+                vertex_texture_coords_clockwise,
+                texture
+            } => runner(Renderer2DAction {
+                texture: Some(texture.clone()),
+                vertices_clockwise: [
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[0],
+                        texture_coord: vertex_texture_coords_clockwise[0],
+                        color: vertex_colors_clockwise[0],
+                        texture_mix: 1.0,
+                        circle_mix: 0.0
+                    },
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[1],
+                        texture_coord: vertex_texture_coords_clockwise[1],
+                        color: vertex_colors_clockwise[1],
+                        texture_mix: 1.0,
+                        circle_mix: 0.0
+                    },
+                    Renderer2DVertex {
+                        position: vertex_positions_clockwise[2],
+                        texture_coord: vertex_texture_coords_clockwise[2],
+                        color: vertex_colors_clockwise[2],
+                        texture_mix: 1.0,
+                        circle_mix: 0.0
+                    }
+                ]
+            })
+        }
+    }
+
+    #[cfg(not(feature = "text"))]
+    #[inline]
+    fn generate_actions(&self, runner: &mut impl FnMut(Renderer2DAction))
+    {
+        match self {
+            #[cfg(feature = "text")]
+            RenderQueueItem::FormattedTextBlock {
+                position,
+                color,
+                block
+            } => {
+                for line in block.iter_lines() {
+                    for glyph in line.iter_glyphs() {
+                        glyph_cache.get_renderer2d_actions(
+                            glyph, *position, *color, None, runner
+                        );
+                    }
+                }
+            }
+
+            #[cfg(feature = "text")]
             RenderQueueItem::FormattedTextGlyph {
                 glyph,
                 position,
@@ -463,7 +601,9 @@ pub struct Renderer2D
 
     render_queue: Vec<RenderQueueItem>,
 
+    #[cfg(feature = "text")]
     glyph_cache: GlyphCache,
+
     attribute_buffers: AttributeBuffers,
     current_texture: Option<GLTexture>,
 
@@ -550,7 +690,10 @@ impl Renderer2D
             context: context.clone(),
             program,
             render_queue: Vec::new(),
+
+            #[cfg(feature = "text")]
             glyph_cache: GlyphCache::new(),
+
             attribute_buffers,
             current_texture: None,
             uniforms
@@ -568,6 +711,7 @@ impl Renderer2D
     pub fn finish_frame(&mut self)
     {
         self.flush_render_queue();
+        #[cfg(feature = "text")]
         self.glyph_cache.on_new_frame_start();
     }
 
@@ -583,6 +727,7 @@ impl Renderer2D
 
         for item in &self.render_queue {
             match item {
+                #[cfg(feature = "text")]
                 RenderQueueItem::FormattedTextBlock {
                     block, position, ..
                 } => {
@@ -598,6 +743,8 @@ impl Renderer2D
 
                     has_text = true;
                 }
+
+                #[cfg(feature = "text")]
                 RenderQueueItem::FormattedTextGlyph {
                     glyph, position, ..
                 } => {
@@ -611,6 +758,7 @@ impl Renderer2D
             }
         }
 
+        #[cfg(feature = "text")]
         if has_text {
             if let Err(err) = self.glyph_cache.prepare_for_draw(&self.context) {
                 log::error!("Error updating font texture, continuing anyway: {:?}", err);
@@ -624,7 +772,24 @@ impl Renderer2D
             let attribute_buffers = &mut self.attribute_buffers;
 
             for item in &self.render_queue {
+                #[cfg(feature = "text")]
                 item.generate_actions(&self.glyph_cache, &mut |action| {
+                    if !action.update_current_texture_if_empty(current_texture) {
+                        Renderer2D::draw_buffers(
+                            context,
+                            program,
+                            attribute_buffers,
+                            current_texture
+                        );
+
+                        *current_texture = action.texture.clone();
+                    }
+
+                    action.append_to_attribute_buffers(attribute_buffers);
+                });
+
+                #[cfg(not(feature = "text"))]
+                item.generate_actions(&mut |action| {
                     if !action.update_current_texture_if_empty(current_texture) {
                         Renderer2D::draw_buffers(
                             context,
@@ -862,6 +1027,7 @@ impl Renderer2D
         })
     }
 
+    #[cfg(feature = "text")]
     #[inline]
     pub(crate) fn draw_text<V: Into<Vec2>>(
         &mut self,
@@ -877,6 +1043,7 @@ impl Renderer2D
         })
     }
 
+    #[cfg(feature = "text")]
     #[inline]
     pub(crate) fn draw_text_cropped<V: Into<Vec2>>(
         &mut self,
