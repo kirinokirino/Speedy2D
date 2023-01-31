@@ -1,6 +1,6 @@
 [package]
 name = "speedy2d"
-version = "1.9.3"
+version = "1.9.4"
 authors = ["QuantumBadger <speedy2d@redreader.org>"]
 edition = "2021"
 license = "Apache-2.0"
