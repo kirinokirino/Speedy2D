@@ -16,7 +16,7 @@ repository = "https://github.com/QuantumBadger/Speedy2D"
 documentation = "https://docs.rs/speedy2d"
 
 [features]
-default = ["windowing", "image-loading", "glutin-default"]
+default = ["windowing", "image-loading"]
 image-loading = ["image"]
 windowing = ["glutin/x11", "glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
 windowing-x11 = ["glutin/x11"]
