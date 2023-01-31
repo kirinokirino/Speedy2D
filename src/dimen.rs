@@ -458,6 +458,7 @@ mod test
         assert_eq!(IVec2::new(-5, 17), IVec2::new(-5, 10) + IVec2::new_y(7));
     }
 
+    #[allow(clippy::op_ref)]
     #[test]
     fn test_arithmetic_ref()
     {
@@ -492,6 +493,7 @@ mod test
         );
     }
 
+    #[allow(clippy::op_ref)]
     #[test]
     fn test_arithmetic_tuples()
     {

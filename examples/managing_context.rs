@@ -51,11 +51,10 @@ fn main()
         *control_flow = ControlFlow::Poll;
 
         match event {
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                _ => {}
-            },
-
+            Event::WindowEvent {
+                event: WindowEvent::CloseRequested,
+                ..
+            } => *control_flow = ControlFlow::Exit,
             Event::RedrawRequested(_) => context.window().request_redraw(),
             Event::RedrawEventsCleared => {
                 renderer.draw_frame(|graphics| {
@@ -92,12 +91,8 @@ fn create_best_context(
 
             let result =
                 windowed_context.build_windowed(window_builder.clone(), event_loop);
-
-            match result {
-                Ok(context) => {
-                    return Some(context);
-                }
-                Err(_) => {}
+            if let Ok(context) = result {
+                return Some(context);
             }
         }
     }
