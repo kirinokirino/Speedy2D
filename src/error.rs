@@ -17,7 +17,18 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
 
+#[cfg(feature = "backtrace")]
 use backtrace::Backtrace;
+
+#[cfg(not(feature = "backtrace"))]
+struct Backtrace {}
+
+#[cfg(not(feature = "backtrace"))]
+impl Backtrace {
+    pub fn new() -> Self {
+        Self {}
+    }
+}
 
 /// An error with an associated backtrace, and an optional cause.
 #[derive(Clone)]

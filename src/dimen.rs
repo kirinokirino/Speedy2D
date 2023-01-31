@@ -16,6 +16,7 @@
 
 use std::convert::TryInto;
 
+#[cfg(feature = "backtrace")]
 use rusttype::Point;
 
 use crate::numeric::{PrimitiveZero, RoundFloat};
@@ -425,6 +426,7 @@ impl<T: RoundFloat> RoundFloat for Vector2<T>
     }
 }
 
+#[cfg(feature = "text")]
 impl<T> From<Point<T>> for Vector2<T>
 {
     #[inline]

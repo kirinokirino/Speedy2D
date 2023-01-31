@@ -228,6 +228,7 @@ where
     }
 }
 
+#[cfg(feature = "text")]
 impl<T> From<rusttype::Rect<T>> for Rectangle<T>
 {
     fn from(rect: rusttype::Rect<T>) -> Self

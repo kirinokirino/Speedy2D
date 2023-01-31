@@ -344,6 +344,7 @@ pub mod color;
 pub mod shape;
 
 /// Components for loading fonts and laying out text.
+#[cfg(feature = "font")]
 pub mod font;
 
 /// Types representing sizes and positions.
