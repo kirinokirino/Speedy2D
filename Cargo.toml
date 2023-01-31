@@ -22,7 +22,7 @@ windowing = ["glutin"]
 windowing-x11 = ["glutin/x11"]
 windowing-wayland = ["glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
 backtrace = ["dep:backtrace"]
-text = ["rusttype"]
+text = ["rusttype", "unicode-normalization"]
 
 [dependencies]
 gl = "0.14"
@@ -30,7 +30,7 @@ glow = "0.7"
 log = "0.4"
 backtrace = { version = "0.3", optional = true }
 rusttype = { version = "0.9", optional = true }
-unicode-normalization = "0.1"
+unicode-normalization = { version = "0.1", optional = true }
 num-traits = "0.2"
 earcutr = "0.4.1"
 smallvec = "1.10.0"
