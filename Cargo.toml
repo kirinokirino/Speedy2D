@@ -16,9 +16,12 @@ repository = "https://github.com/QuantumBadger/Speedy2D"
 documentation = "https://docs.rs/speedy2d"
 
 [features]
-default = ["windowing", "image-loading"]
+default = ["windowing", "image-loading", "glutin-default"]
 windowing = ["glutin"]
 image-loading = ["image"]
+glutin-default = ["glutin/x11", "glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
+gultin-x11 = ["glutin/x11"]
+gultin-wayland = ["glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
 
 [dependencies]
 gl = "0.14"
@@ -36,7 +39,7 @@ image = { version = "0.23", optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # For windowing feature
-glutin = { version = "0.28", optional = true }
+glutin = { version = "0.29.1", default-features = false, optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { version = "0.2" }
@@ -70,7 +73,7 @@ simple_logger = { version = "1.11", default-features = false, features = ["color
 image = { version = "0.23" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-glutin = "0.28"
+glutin = { version = "0.29.1", default-features = false, features = ["x11"] }
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 wasm-bindgen = { version = "0.2" }
