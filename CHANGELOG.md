@@ -142,3 +142,13 @@ Thanks to [UdHo](https://github.com/UdHo)
 ### Fixes
 
 * Text drawn at a non-pixel-aligned position was getting snapped to the nearest pixel -- this is now fixed.
+
+## 1.10.0
+
+### New APIs
+
+* `Rectangle::as_f32()`
+
+### Fixes
+
+* Fix for issue #55 (text appearing as solid rectangles due to texture not being unbound correctly)
