@@ -16,7 +16,6 @@
 
 use std::convert::TryInto;
 
-#[cfg(feature = "backtrace")]
 use rusttype::Point;
 
 use crate::numeric::{PrimitiveZero, RoundFloat};
