@@ -16,6 +16,7 @@
 
 use std::convert::TryInto;
 
+#[cfg(feature = "text")]
 use rusttype::Point;
 
 use crate::numeric::{PrimitiveZero, RoundFloat};
