@@ -26,15 +26,16 @@ use {
 };
 
 use crate::color::Color;
-use crate::dimen::{UVec2, Vec2};
 use crate::error::{BacktraceError, Context, ErrorMessage};
 #[cfg(feature = "text")]
 use crate::font::{FormattedGlyph, FormattedTextBlock};
 #[cfg(feature = "text")]
 use crate::font_cache::GlyphCache;
 use crate::glwrapper::*;
+use crate::image::RawBitmapData;
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode};
-use crate::{Polygon, RawBitmapData, Rect, Rectangle};
+use crate::shape::{IRect, Polygon, Rect};
+use glam::{IVec2, UVec2, Vec2};
 
 struct AttributeBuffers {
     position: Vec<f32>,
@@ -1026,20 +1027,17 @@ impl Renderer2D {
     }
 
     #[inline]
-    pub(crate) fn set_clip(&mut self, rect: Option<Rectangle<i32>>) {
+    pub(crate) fn set_clip(&mut self, rect: Option<IRect>) {
         // If we change the clip area, we need to draw everything in a queue
         // through the current clip before setting new one.
         self.flush_render_queue();
         match rect {
             None => self.context.set_enable_scissor(false),
             Some(rect) => {
+                let IRect { top_left, .. } = rect;
+                let (width, height) = rect.size().into();
                 self.context.set_enable_scissor(true);
-                self.context.set_clip(
-                    rect.top_left().x,
-                    rect.top_left().y,
-                    rect.width(),
-                    rect.height(),
-                )
+                self.context.set_clip(top_left.x, top_left.y, width, height)
             }
         }
     }

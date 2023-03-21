@@ -16,8 +16,8 @@
 
 #![deny(warnings)]
 
+use glam::{UVec2, Vec2};
 use speedy2d::color::Color;
-use speedy2d::dimen::{UVec2, Vec2};
 use speedy2d::window::{
     KeyScancode, ModifiersState, MouseButton, MouseScrollDistance, VirtualKeyCode, WindowHandler,
     WindowHelper, WindowStartupInfo,

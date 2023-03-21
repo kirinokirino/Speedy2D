@@ -19,8 +19,8 @@
 use std::rc::Rc;
 use std::time::Instant;
 
+use glam::Vec2;
 use speedy2d::color::Color;
-use speedy2d::dimen::Vec2;
 use speedy2d::font::{Font, FormattedTextBlock, TextAlignment, TextLayout, TextOptions};
 use speedy2d::shape::Rect;
 use speedy2d::window::{WindowHandler, WindowHelper};

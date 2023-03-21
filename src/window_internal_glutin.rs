@@ -31,7 +31,6 @@ use glutin::window::{
     CursorGrabMode, Icon, Window as GlutinWindow, WindowBuilder as GlutinWindowBuilder,
 };
 
-use crate::dimen::{IVec2, UVec2, Vec2, Vector2};
 use crate::error::{BacktraceError, ErrorMessage};
 use crate::glbackend::constants::GL_VERSION;
 use crate::glbackend::{GLBackend, GLBackendGlow};
@@ -42,6 +41,7 @@ use crate::window::{
     WindowHelper, WindowPosition, WindowSize, WindowStartupInfo,
 };
 use crate::GLRenderer;
+use glam::{DVec2, IVec2, UVec2, Vec2};
 
 pub(crate) struct WindowHelperGlutin<UserEventType: 'static> {
     window_context: Rc<glutin::ContextWrapper<glutin::PossiblyCurrent, GlutinWindow>>,
@@ -350,7 +350,8 @@ impl<UserEventType: 'static> WindowGlutin<UserEventType> {
     }
 
     pub fn get_inner_size_pixels(&self) -> UVec2 {
-        self.window_context.window().inner_size().into()
+        let (x, y) = self.window_context.window().inner_size().into();
+        UVec2::new(x, y)
     }
 
     fn loop_handle_event<Handler>(
@@ -384,14 +385,16 @@ impl<UserEventType: 'static> WindowGlutin<UserEventType> {
                 GlutinWindowEvent::Resized(physical_size) => {
                     log::info!("Resized: {:?}", physical_size);
                     window_context.resize(physical_size);
-                    helper.inner().physical_size = physical_size.into();
-                    handler.on_resize(helper, physical_size.into())
+                    let (x, y) = physical_size.into();
+                    let physical_size = UVec2::new(x, y);
+                    helper.inner().physical_size = physical_size;
+                    handler.on_resize(helper, physical_size)
                 }
 
                 GlutinWindowEvent::CloseRequested => return WindowEventLoopAction::Exit,
 
                 GlutinWindowEvent::CursorMoved { position, .. } => {
-                    let position = Vector2::new(position.x, position.y).into_f32();
+                    let position = DVec2::new(position.x, position.y);
 
                     if helper.inner().is_mouse_grabbed.get() {
                         let central_position = helper.inner().physical_size / 2;
@@ -403,13 +406,13 @@ impl<UserEventType: 'static> WindowGlutin<UserEventType> {
                             ))
                             .unwrap();
 
-                        let position = position - central_position.into_f32();
+                        let position = position - central_position.as_dvec2();
 
-                        if position.magnitude_squared() > 0.0001 {
-                            handler.on_mouse_move(helper, position);
+                        if position.length_squared() > 0.0001 {
+                            handler.on_mouse_move(helper, position.as_vec2());
                         }
                     } else {
-                        handler.on_mouse_move(helper, position);
+                        handler.on_mouse_move(helper, position.as_vec2());
                     };
                 }
 
@@ -492,7 +495,8 @@ impl<UserEventType: 'static> WindowGlutin<UserEventType> {
         let window_context = self.window_context.clone();
         let event_loop = self.event_loop;
 
-        let initial_viewport_size_pixels = window_context.window().inner_size().into();
+        let (x, y) = window_context.window().inner_size().into();
+        let initial_viewport_size_pixels = UVec2::new(x, y);
 
         let mut handler = DrawingWindowHandler::new(handler, renderer);
 
@@ -853,12 +857,6 @@ impl From<glutin::event::ModifiersState> for ModifiersState {
             shift: state.shift(),
             logo: state.logo(),
         }
-    }
-}
-
-impl From<PhysicalSize<u32>> for UVec2 {
-    fn from(value: PhysicalSize<u32>) -> Self {
-        Self::new(value.width, value.height)
     }
 }
 

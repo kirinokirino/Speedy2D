@@ -22,14 +22,13 @@ use std::ops::Div;
 use std::rc::Rc;
 
 use crate::color::Color;
-use crate::dimen::{IVec2, UVec2, Vec2};
 use crate::error::{BacktraceError, Context, ErrorMessage};
+use crate::font;
 use crate::glwrapper::{GLContextManager, GLTexture, GLTextureImageFormatU8, GLTextureSmoothing};
-use crate::numeric::RoundFloat;
 use crate::renderer2d::{Renderer2DAction, Renderer2DVertex};
-use crate::shape::Rectangle;
+use crate::shape::{IRect, Rect, URect};
 use crate::texture_packer::{TexturePacker, TexturePackerError};
-use crate::{font, Rect};
+use glam::{vec2, IVec2, UVec2, Vec2};
 
 #[repr(transparent)]
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]
@@ -123,26 +122,22 @@ impl GlyphCache {
         let texture_entry = texture_cache.entries.get(&key).unwrap();
 
         let texture_size = GlyphCacheTexture::SIZE as f32;
-
-        let mut texture_region = Rectangle::new(
-            texture_entry
-                .texture_area
-                .top_left()
-                .into_f32()
-                .div(texture_size),
-            texture_entry
-                .texture_area
-                .bottom_right()
-                .into_f32()
-                .div(texture_size),
+        let URect {
+            top_left,
+            bottom_right,
+        } = texture_entry.texture_area;
+        let mut texture_region = Rect::new(
+            top_left.as_vec2().div(texture_size),
+            bottom_right.as_vec2().div(texture_size),
         );
-
-        let position = position + Vec2::from(positioned_glyph.position());
+        let a: () = position;
+        let b: () = positioned_glyph.position();
+        let position = position + positioned_glyph.position();
 
         // We round the position here as the offset is between -0.5 and 0.5
-        let screen_region_start = position.round().into_i32() + entry.bounding_box_offset;
+        let screen_region_start = position.round().as_ivec() + entry.bounding_box_offset;
 
-        let mut screen_region = Rectangle::new(
+        let mut screen_region = IRect::new(
             screen_region_start,
             screen_region_start + texture_entry.texture_area.size().into_i32(),
         )
@@ -162,7 +157,7 @@ impl GlyphCache {
                     - screen_intersection.bottom_right().y)
                     / screen_region.height();
 
-                texture_region = Rectangle::new(
+                texture_region = Rect::new(
                     texture_region.top_left()
                         + Vec2::new(
                             texture_region.width() * left_diff,
@@ -260,7 +255,7 @@ impl GlyphCache {
                     .unscaled()
                     .clone()
                     .scaled(rusttype::Scale::uniform(key.scale.to_pixels()))
-                    .positioned(rusttype::point(
+                    .positioned(vec2(
                         key.subpixel_offset.0.to_pixels(),
                         key.subpixel_offset.1.to_pixels(),
                     ));
@@ -550,7 +545,7 @@ struct GlyphCacheEntry {
 }
 
 struct GlyphTextureCacheEntry {
-    texture_area: Rectangle<u32>,
+    texture_area: URect,
 }
 
 struct GlyphCacheTexture {

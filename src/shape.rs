@@ -14,119 +14,73 @@
  *  limitations under the License.
  */
 
-use crate::dimen::{Vec2, Vector2};
-use crate::numeric::{max, min, PrimitiveZero};
+use glam::{IVec2, UVec2, Vec2};
 
 /// A struct representing an axis-aligned rectangle. Two points are stored: the
 /// top left vertex, and the bottom right vertex.
-///
-/// Alias for a rectangle with u32 coordinates.
-pub type URect = Rectangle<u32>;
-
-/// A struct representing an axis-aligned rectangle. Two points are stored: the
-/// top left vertex, and the bottom right vertex.
-///
-/// Alias for a rectangle with i32 coordinates.
-pub type IRect = Rectangle<i32>;
-
-/// A struct representing an axis-aligned rectangle. Two points are stored: the
-/// top left vertex, and the bottom right vertex.
-///
-/// Alias for a rectangle with f32 coordinates.
-pub type Rect = Rectangle<f32>;
-
-/// A struct representing an axis-aligned rectangle. Two points are stored: the
-/// top left vertex, and the bottom right vertex.
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 #[repr(C)]
-pub struct Rectangle<T = f32> {
-    top_left: Vector2<T>,
-    bottom_right: Vector2<T>,
+pub struct Rect {
+    pub top_left: Vec2,
+    pub bottom_right: Vec2,
 }
 
-impl<T> Rectangle<T> {
-    /// Constructs a new `Rectangle`. The top left vertex must be above and to
+impl Rect {
+    /// Constructs a new `Rect`. The top left vertex must be above and to
     /// the left of the bottom right vertex.
     #[inline]
-    pub const fn new(top_left: Vector2<T>, bottom_right: Vector2<T>) -> Self {
-        Rectangle {
+    pub const fn new(top_left: Vec2, bottom_right: Vec2) -> Self {
+        Self {
             top_left,
             bottom_right,
         }
     }
 
-    /// Constructs a new `Rectangle`. The top left vertex must be above and to
+    #[inline]
+    pub const fn corners(self) -> [Vec2; 4] {
+        let top_right = Vec2::new(self.bottom_right.x, self.top_left.y);
+        let bottom_left = Vec2::new(self.top_left.x, self.bottom_right.y);
+        [self.top_left, top_right, self.bottom_right, bottom_left]
+    }
+
+    /// Constructs a new `Rect`. The top left vertex must be above and to
     /// the left of the bottom right vertex.
     #[inline]
-    pub fn from_tuples(top_left: (T, T), bottom_right: (T, T)) -> Self {
-        Rectangle {
-            top_left: Vector2::new(top_left.0, top_left.1),
-            bottom_right: Vector2::new(bottom_right.0, bottom_right.1),
+    pub fn from_tuples(top_left: (f32, f32), bottom_right: (f32, f32)) -> Self {
+        Self {
+            top_left: Vec2::new(top_left.0, top_left.1),
+            bottom_right: Vec2::new(bottom_right.0, bottom_right.1),
         }
     }
 
-    /// Returns a reference to the top left vertex.
-    #[inline]
-    pub const fn top_left(&self) -> &Vector2<T> {
-        &self.top_left
-    }
-
-    /// Returns a reference to the bottom right vertex.
-    #[inline]
-    pub const fn bottom_right(&self) -> &Vector2<T> {
-        &self.bottom_right
-    }
-}
-
-impl<T: Copy> Rectangle<T> {
-    /// Returns a vector representing the top right vertex.
-    #[inline]
-    pub fn top_right(&self) -> Vector2<T> {
-        Vector2::new(self.bottom_right.x, self.top_left.y)
-    }
-
-    /// Returns a vector representing the bottom left vertex.
-    #[inline]
-    pub fn bottom_left(&self) -> Vector2<T> {
-        Vector2::new(self.top_left.x, self.bottom_right.y)
-    }
-}
-
-impl<T: std::ops::Sub<Output = T> + Copy> Rectangle<T> {
     /// Returns the width of the rectangle.
     #[inline]
-    pub fn width(&self) -> T {
+    pub fn width(&self) -> f32 {
         self.bottom_right.x - self.top_left.x
     }
 
     /// Returns the height of the rectangle.
     #[inline]
-    pub fn height(&self) -> T {
+    pub fn height(&self) -> f32 {
         self.bottom_right.y - self.top_left.y
     }
 
     /// Returns a `Vector2` containing the width and height of the rectangle.
     #[inline]
-    pub fn size(&self) -> Vector2<T> {
-        Vector2::new(self.width(), self.height())
+    pub fn size(&self) -> Vec2 {
+        Vec2::new(self.width(), self.height())
     }
-}
-
-impl<T: PartialOrd<T> + Copy> Rectangle<T> {
     /// Returns true if the specified point is inside this rectangle. This is
     /// inclusive of the top and left coordinates, and exclusive of the bottom
     /// and right coordinates.
     #[inline]
     #[must_use]
-    pub fn contains(&self, point: Vector2<T>) -> bool {
+    pub fn contains(&self, point: Vec2) -> bool {
         point.x >= self.top_left.x
             && point.y >= self.top_left.y
             && point.x < self.bottom_right.x
             && point.y < self.bottom_right.y
     }
-}
-
-impl<T: PartialOrd + Copy> Rectangle<T> {
     /// Finds the intersection of two rectangles -- in other words, the area
     /// that is common to both of them.
     ///
@@ -136,13 +90,13 @@ impl<T: PartialOrd + Copy> Rectangle<T> {
     #[must_use]
     pub fn intersect(&self, other: &Self) -> Option<Self> {
         let result = Self {
-            top_left: Vector2::new(
-                max(self.top_left.x, other.top_left.x),
-                max(self.top_left.y, other.top_left.y),
+            top_left: Vec2::new(
+                self.top_left.x.max(other.top_left.x),
+                self.top_left.y.max(other.top_left.y),
             ),
-            bottom_right: Vector2::new(
-                min(self.bottom_right.x, other.bottom_right.x),
-                min(self.bottom_right.y, other.bottom_right.y),
+            bottom_right: Vec2::new(
+                self.bottom_right.x.min(other.bottom_right.x),
+                self.bottom_right.y.min(other.bottom_right.y),
             ),
         };
 
@@ -152,82 +106,258 @@ impl<T: PartialOrd + Copy> Rectangle<T> {
             None
         }
     }
-}
-
-impl<T: PrimitiveZero> Rectangle<T> {
     /// A constant representing a rectangle with position (0, 0) and zero area.
     /// Each component is set to zero.
-    pub const ZERO: Rectangle<T> = Rectangle::new(Vector2::ZERO, Vector2::ZERO);
-}
-
-impl<T: PartialEq> Rectangle<T> {
+    pub const ZERO: Rect = Rect::new(Vec2::ZERO, Vec2::ZERO);
     /// Returns `true` if the rectangle has zero area.
     #[inline]
     pub fn is_zero_area(&self) -> bool {
         self.top_left.x == self.bottom_right.x || self.top_left.y == self.bottom_right.y
     }
-}
-
-impl<T: PartialOrd> Rectangle<T> {
     /// Returns `true` if the rectangle has an area greater than zero.
     #[inline]
     pub fn is_positive_area(&self) -> bool {
         self.top_left.x < self.bottom_right.x && self.top_left.y < self.bottom_right.y
     }
-}
-
-impl<T: Copy> Rectangle<T>
-where
-    Vector2<T>: std::ops::Add<Output = Vector2<T>>,
-{
     /// Returns a new rectangle, whose vertices are offset relative to the
     /// current rectangle by the specified amount. This is equivalent to
     /// adding the specified vector to each vertex.
     #[inline]
-    pub fn with_offset(&self, offset: impl Into<Vector2<T>>) -> Self {
+    pub fn with_offset(&self, offset: impl Into<Vec2>) -> Self {
         let offset = offset.into();
-        Rectangle::new(self.top_left + offset, self.bottom_right + offset)
+        Self::new(self.top_left + offset, self.bottom_right + offset)
     }
-}
-
-impl<T: Copy> Rectangle<T>
-where
-    Vector2<T>: std::ops::Sub<Output = Vector2<T>>,
-{
     /// Returns a new rectangle, whose vertices are negatively offset relative
     /// to the current rectangle by the specified amount. This is equivalent
     /// to subtracting the specified vector to each vertex.
     #[inline]
-    pub fn with_negative_offset(&self, offset: impl Into<Vector2<T>>) -> Self {
+    pub fn with_negative_offset(&self, offset: impl Into<Vec2>) -> Self {
         let offset = offset.into();
-        Rectangle::new(self.top_left - offset, self.bottom_right - offset)
+        Self::new(self.top_left - offset, self.bottom_right - offset)
     }
 }
 
-#[cfg(feature = "text")]
-impl<T> From<rusttype::Rect<T>> for Rectangle<T> {
-    fn from(rect: rusttype::Rect<T>) -> Self {
-        Rectangle::new(Vector2::from(rect.min), Vector2::from(rect.max))
-    }
+#[derive(Debug, PartialEq, Eq, Clone)]
+#[repr(C)]
+pub struct URect {
+    pub top_left: UVec2,
+    pub bottom_right: UVec2,
 }
 
-impl<T: num_traits::AsPrimitive<f32>> Rectangle<T> {
-    /// Returns a new rectangle where the coordinates have been cast to `f32`
-    /// values, using the `as` operator.
+impl URect {
+    /// Constructs a new `Rect`. The top left vertex must be above and to
+    /// the left of the bottom right vertex.
+    #[inline]
+    pub const fn new(top_left: UVec2, bottom_right: UVec2) -> Self {
+        Self {
+            top_left,
+            bottom_right,
+        }
+    }
+
+    /// Constructs a new `Rect`. The top left vertex must be above and to
+    /// the left of the bottom right vertex.
+    #[inline]
+    pub fn from_tuples(top_left: (u32, u32), bottom_right: (u32, u32)) -> Self {
+        Self {
+            top_left: UVec2::new(top_left.0, top_left.1),
+            bottom_right: UVec2::new(bottom_right.0, bottom_right.1),
+        }
+    }
+
+    /// Returns the width of the rectangle.
+    #[inline]
+    pub fn width(&self) -> u32 {
+        self.bottom_right.x - self.top_left.x
+    }
+
+    /// Returns the height of the rectangle.
+    #[inline]
+    pub fn height(&self) -> u32 {
+        self.bottom_right.y - self.top_left.y
+    }
+
+    /// Returns a `Vector2` containing the width and height of the rectangle.
+    #[inline]
+    pub fn size(&self) -> UVec2 {
+        UVec2::new(self.width(), self.height())
+    }
+    /// Returns true if the specified point is inside this rectangle. This is
+    /// inclusive of the top and left coordinates, and exclusive of the bottom
+    /// and right coordinates.
     #[inline]
     #[must_use]
-    pub fn into_f32(self) -> Rectangle<f32> {
-        Rectangle::new(self.top_left.into_f32(), self.bottom_right.into_f32())
+    pub fn contains(&self, point: UVec2) -> bool {
+        point.x >= self.top_left.x
+            && point.y >= self.top_left.y
+            && point.x < self.bottom_right.x
+            && point.y < self.bottom_right.y
+    }
+    /// Finds the intersection of two rectangles -- in other words, the area
+    /// that is common to both of them.
+    ///
+    /// If there is no common area between the two rectangles, then this
+    /// function will return `None`.
+    #[inline]
+    #[must_use]
+    pub fn intersect(&self, other: &Self) -> Option<Self> {
+        let result = Self {
+            top_left: UVec2::new(
+                self.top_left.x.max(other.top_left.x),
+                self.top_left.y.max(other.top_left.y),
+            ),
+            bottom_right: UVec2::new(
+                self.bottom_right.x.min(other.bottom_right.x),
+                self.bottom_right.y.min(other.bottom_right.y),
+            ),
+        };
+
+        if result.is_positive_area() {
+            Some(result)
+        } else {
+            None
+        }
+    }
+    /// A constant representing a rectangle with position (0, 0) and zero area.
+    /// Each component is set to zero.
+    pub const ZERO: URect = URect::new(UVec2::ZERO, UVec2::ZERO);
+    /// Returns `true` if the rectangle has zero area.
+    #[inline]
+    pub fn is_zero_area(&self) -> bool {
+        self.top_left.x == self.bottom_right.x || self.top_left.y == self.bottom_right.y
+    }
+    /// Returns `true` if the rectangle has an area greater than zero.
+    #[inline]
+    pub fn is_positive_area(&self) -> bool {
+        self.top_left.x < self.bottom_right.x && self.top_left.y < self.bottom_right.y
+    }
+    /// Returns a new rectangle, whose vertices are offset relative to the
+    /// current rectangle by the specified amount. This is equivalent to
+    /// adding the specified vector to each vertex.
+    #[inline]
+    pub fn with_offset(&self, offset: impl Into<UVec2>) -> Self {
+        let offset = offset.into();
+        Self::new(self.top_left + offset, self.bottom_right + offset)
+    }
+    /// Returns a new rectangle, whose vertices are negatively offset relative
+    /// to the current rectangle by the specified amount. This is equivalent
+    /// to subtracting the specified vector to each vertex.
+    #[inline]
+    pub fn with_negative_offset(&self, offset: impl Into<UVec2>) -> Self {
+        let offset = offset.into();
+        Self::new(self.top_left - offset, self.bottom_right - offset)
     }
 }
 
-impl<T: num_traits::AsPrimitive<f32> + Copy> Rectangle<T> {
-    /// Returns a new rectangle where the coordinates have been cast to `f32`
-    /// values, using the `as` operator.
+#[derive(Debug, PartialEq, Eq, Clone)]
+#[repr(C)]
+pub struct IRect {
+    pub top_left: IVec2,
+    pub bottom_right: IVec2,
+}
+
+impl IRect {
+    /// Constructs a new `Rect`. The top left vertex must be above and to
+    /// the left of the bottom right vertex.
+    #[inline]
+    pub const fn new(top_left: IVec2, bottom_right: IVec2) -> Self {
+        Self {
+            top_left,
+            bottom_right,
+        }
+    }
+
+    /// Constructs a new `Rect`. The top left vertex must be above and to
+    /// the left of the bottom right vertex.
+    #[inline]
+    pub fn from_tuples(top_left: (i32, i32), bottom_right: (i32, i32)) -> Self {
+        Self {
+            top_left: IVec2::new(top_left.0, top_left.1),
+            bottom_right: IVec2::new(bottom_right.0, bottom_right.1),
+        }
+    }
+
+    /// Returns the width of the rectangle.
+    #[inline]
+    pub fn width(&self) -> i32 {
+        self.bottom_right.x - self.top_left.x
+    }
+
+    /// Returns the height of the rectangle.
+    #[inline]
+    pub fn height(&self) -> i32 {
+        self.bottom_right.y - self.top_left.y
+    }
+
+    /// Returns a `Vector2` containing the width and height of the rectangle.
+    #[inline]
+    pub fn size(&self) -> IVec2 {
+        IVec2::new(self.width(), self.height())
+    }
+    /// Returns true if the specified point is inside this rectangle. This is
+    /// inclusive of the top and left coordinates, and exclusive of the bottom
+    /// and right coordinates.
     #[inline]
     #[must_use]
-    pub fn as_f32(&self) -> Rectangle<f32> {
-        Rectangle::new(self.top_left.into_f32(), self.bottom_right.into_f32())
+    pub fn contains(&self, point: IVec2) -> bool {
+        point.x >= self.top_left.x
+            && point.y >= self.top_left.y
+            && point.x < self.bottom_right.x
+            && point.y < self.bottom_right.y
+    }
+    /// Finds the intersection of two rectangles -- in other words, the area
+    /// that is common to both of them.
+    ///
+    /// If there is no common area between the two rectangles, then this
+    /// function will return `None`.
+    #[inline]
+    #[must_use]
+    pub fn intersect(&self, other: &Self) -> Option<Self> {
+        let result = Self {
+            top_left: IVec2::new(
+                self.top_left.x.max(other.top_left.x),
+                self.top_left.y.max(other.top_left.y),
+            ),
+            bottom_right: IVec2::new(
+                self.bottom_right.x.min(other.bottom_right.x),
+                self.bottom_right.y.min(other.bottom_right.y),
+            ),
+        };
+
+        if result.is_positive_area() {
+            Some(result)
+        } else {
+            None
+        }
+    }
+    /// A constant representing a rectangle with position (0, 0) and zero area.
+    /// Each component is set to zero.
+    pub const ZERO: URect = URect::new(UVec2::ZERO, UVec2::ZERO);
+    /// Returns `true` if the rectangle has zero area.
+    #[inline]
+    pub fn is_zero_area(&self) -> bool {
+        self.top_left.x == self.bottom_right.x || self.top_left.y == self.bottom_right.y
+    }
+    /// Returns `true` if the rectangle has an area greater than zero.
+    #[inline]
+    pub fn is_positive_area(&self) -> bool {
+        self.top_left.x < self.bottom_right.x && self.top_left.y < self.bottom_right.y
+    }
+    /// Returns a new rectangle, whose vertices are offset relative to the
+    /// current rectangle by the specified amount. This is equivalent to
+    /// adding the specified vector to each vertex.
+    #[inline]
+    pub fn with_offset(&self, offset: impl Into<IVec2>) -> Self {
+        let offset = offset.into();
+        Self::new(self.top_left + offset, self.bottom_right + offset)
+    }
+    /// Returns a new rectangle, whose vertices are negatively offset relative
+    /// to the current rectangle by the specified amount. This is equivalent
+    /// to subtracting the specified vector to each vertex.
+    #[inline]
+    pub fn with_negative_offset(&self, offset: impl Into<IVec2>) -> Self {
+        let offset = offset.into();
+        Self::new(self.top_left - offset, self.bottom_right - offset)
     }
 }
 
@@ -272,23 +402,23 @@ impl Polygon {
 
 #[cfg(test)]
 mod test {
-    use crate::shape::URect;
+    use crate::shape::Rect;
 
     #[test]
     pub fn test_intersect_1() {
-        let r1 = URect::from_tuples((100, 100), (200, 200));
-        let r2 = URect::from_tuples((100, 300), (200, 400));
-        let r3 = URect::from_tuples((125, 50), (175, 500));
+        let r1 = Rect::from_tuples((100.0, 100.0), (200.0, 200.0));
+        let r2 = Rect::from_tuples((100.0, 300.0), (200.0, 400.0));
+        let r3 = Rect::from_tuples((125.0, 50.0), (175.0, 500.0));
 
         assert_eq!(None, r1.intersect(&r2));
 
         assert_eq!(
-            Some(URect::from_tuples((125, 100), (175, 200))),
+            Some(Rect::from_tuples((125.0, 100.0), (175.0, 200.0))),
             r1.intersect(&r3)
         );
 
         assert_eq!(
-            Some(URect::from_tuples((125, 300), (175, 400))),
+            Some(Rect::from_tuples((125.0, 300.0), (175.0, 400.0))),
             r2.intersect(&r3)
         );
 
@@ -299,8 +429,8 @@ mod test {
 
     #[test]
     pub fn test_intersect_2() {
-        let r1 = URect::from_tuples((100, 100), (200, 200));
-        let r2 = URect::from_tuples((100, 200), (200, 300));
+        let r1 = Rect::from_tuples((100.0, 100.0), (200.0, 200.0));
+        let r2 = Rect::from_tuples((100.0, 200.0), (200.0, 300.0));
 
         assert_eq!(None, r1.intersect(&r2));
     }

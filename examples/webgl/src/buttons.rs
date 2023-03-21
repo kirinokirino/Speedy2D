@@ -19,7 +19,7 @@
 use std::rc::Rc;
 
 use speedy2d::color::Color;
-use speedy2d::dimen::Vec2;
+use glam::Vec2;
 use speedy2d::font::{Font, FormattedTextBlock, TextLayout, TextOptions};
 use speedy2d::numeric::RoundFloat;
 use speedy2d::shape::Rectangle;

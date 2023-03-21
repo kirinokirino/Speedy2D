@@ -18,8 +18,8 @@
 
 use std::time::Instant;
 
+use glam::Vec2;
 use speedy2d::color::Color;
-use speedy2d::dimen::Vec2;
 use speedy2d::window::{WindowHandler, WindowHelper};
 use speedy2d::{Graphics2D, Window};
 

@@ -14,24 +14,24 @@
  *  limitations under the License.
  */
 
-use crate::dimen::UVec2;
-use crate::shape::Rectangle;
+use crate::shape::URect;
 use crate::texture_packer::TexturePackerError::NotEnoughSpace;
+use glam::UVec2;
 
 #[derive(Debug)]
 struct FreeRegion {
-    rect: Rectangle<u32>,
+    rect: URect,
 }
 
 impl FreeRegion {
     #[inline]
-    fn from_rectangle(rect: Rectangle<u32>) -> Self {
+    fn from_rectangle(rect: URect) -> Self {
         FreeRegion { rect }
     }
 
     #[inline]
     fn new(width: u32, height: u32) -> Self {
-        FreeRegion::from_rectangle(Rectangle::new(UVec2::ZERO, UVec2::new(width, height)))
+        FreeRegion::from_rectangle(URect::new(UVec2::ZERO, UVec2::new(width, height)))
     }
 }
 
@@ -52,12 +52,9 @@ impl TexturePacker {
         }
     }
 
-    pub(crate) fn try_allocate(
-        &mut self,
-        size: UVec2,
-    ) -> Result<Rectangle<u32>, TexturePackerError> {
+    pub(crate) fn try_allocate(&mut self, size: UVec2) -> Result<URect, TexturePackerError> {
         if size.x == 0 || size.y == 0 {
-            return Ok(Rectangle::new(UVec2::ZERO, size));
+            return Ok(URect::new(UVec2::ZERO, size));
         }
 
         let size = size + UVec2::new(2, 2);
@@ -88,25 +85,13 @@ impl TexturePacker {
         }
 
         let best_area = best_area.ok_or(NotEnoughSpace)?;
+        let URect { top_left, .. } = best_area.rect;
+        let bottom_right = top_left + size;
+        let alloc_area_with_border = URect::new(top_left, bottom_right);
 
-        let alloc_area_with_border =
-            Rectangle::new(*best_area.rect.top_left(), best_area.rect.top_left() + size);
-
-        let space_underneath = Rectangle::new(
-            UVec2::new(
-                best_area.rect.top_left().x,
-                alloc_area_with_border.bottom_right().y,
-            ),
-            *best_area.rect.bottom_right(),
-        );
-
-        let space_right = Rectangle::new(
-            UVec2::new(
-                alloc_area_with_border.bottom_right().x,
-                best_area.rect.top_left().y,
-            ),
-            space_underneath.top_right(),
-        );
+        let space_underneath = URect::new(UVec2::new(top_left.x, bottom_right.y), bottom_right);
+        let top_right = UVec2::new(bottom_right.x, top_left.y);
+        let space_right = URect::new(UVec2::new(bottom_right.x, top_left.y), top_right);
 
         if space_right.is_zero_area() {
             best_area.rect = space_underneath
@@ -119,9 +104,9 @@ impl TexturePacker {
             }
         }
 
-        Ok(Rectangle::new(
-            alloc_area_with_border.top_left() + UVec2::new(1, 1),
-            alloc_area_with_border.bottom_right() - UVec2::new(1, 1),
+        Ok(URect::new(
+            top_left + UVec2::new(1, 1),
+            bottom_right - UVec2::new(1, 1),
         ))
     }
 }
@@ -136,22 +121,22 @@ mod test {
         let mut packer = TexturePacker::new(64, 64);
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((1, 1), (31, 31))),
+            Ok(URect::from_tuples((1, 1), (31, 31))),
             packer.try_allocate(UVec2::new(30, 30))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((33, 1), (63, 31))),
+            Ok(URect::from_tuples((33, 1), (63, 31))),
             packer.try_allocate(UVec2::new(30, 30))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((1, 33), (31, 63))),
+            Ok(URect::from_tuples((1, 33), (31, 63))),
             packer.try_allocate(UVec2::new(30, 30))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((33, 33), (63, 63))),
+            Ok(URect::from_tuples((33, 33), (63, 63))),
             packer.try_allocate(UVec2::new(30, 30))
         );
 
@@ -163,22 +148,22 @@ mod test {
         let mut packer = TexturePacker::new(64, 64);
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((1, 1), (29, 29))),
+            Ok(URect::from_tuples((1, 1), (29, 29))),
             packer.try_allocate(UVec2::new(28, 28))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((31, 1), (59, 29))),
+            Ok(URect::from_tuples((31, 1), (59, 29))),
             packer.try_allocate(UVec2::new(28, 28))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((1, 31), (29, 59))),
+            Ok(URect::from_tuples((1, 31), (29, 59))),
             packer.try_allocate(UVec2::new(28, 28))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((31, 31), (59, 59))),
+            Ok(URect::from_tuples((31, 31), (59, 59))),
             packer.try_allocate(UVec2::new(28, 28))
         );
 
@@ -190,22 +175,22 @@ mod test {
         let mut packer = TexturePacker::new(64, 64);
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((1, 1), (15, 15))),
+            Ok(URect::from_tuples((1, 1), (15, 15))),
             packer.try_allocate(UVec2::new(14, 14))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((1, 17), (15, 47))),
+            Ok(URect::from_tuples((1, 17), (15, 47))),
             packer.try_allocate(UVec2::new(14, 30))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((17, 17), (47, 47))),
+            Ok(URect::from_tuples((17, 17), (47, 47))),
             packer.try_allocate(UVec2::new(30, 30))
         );
 
         assert_eq!(
-            Ok(Rectangle::from_tuples((17, 1), (31, 15))),
+            Ok(URect::from_tuples((17, 1), (31, 15))),
             packer.try_allocate(UVec2::new(14, 14))
         );
     }

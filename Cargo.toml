@@ -16,7 +16,7 @@ repository = "https://github.com/QuantumBadger/Speedy2D"
 documentation = "https://docs.rs/speedy2d"
 
 [features]
-default = ["windowing", "image-loading", "backtrace", "text"]
+default = ["windowing", "windowing-x11", "image-loading", "backtrace", "text"]
 image-loading = ["image"]
 windowing = ["glutin"]
 windowing-x11 = ["glutin/x11"]
@@ -37,6 +37,7 @@ smallvec = "1.10.0"
 
 # For image_loading feature
 image = { version = "0.23", optional = true }
+glam = "0.23.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # For windowing feature
@@ -113,7 +114,7 @@ required-features = ["windowing"]
 name = "moving_text"
 required-features = ["windowing"]
 
-[workspace]
-members = [
-    "examples/webgl",
-]
+#[workspace]
+#members = [
+#    "examples/webgl",
+#]

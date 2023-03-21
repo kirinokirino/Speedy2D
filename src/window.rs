@@ -17,9 +17,9 @@
 use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
 
-use crate::dimen::{IVec2, UVec2, Vec2};
 use crate::error::{BacktraceError, ErrorMessage};
 use crate::{GLRenderer, Graphics2D};
+use glam::{IVec2, UVec2, Vec2};
 
 #[cfg(all(not(target_arch = "wasm32"), not(any(doc, doctest))))]
 type WindowHelperInnerType<UserEventType> =

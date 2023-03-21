@@ -18,8 +18,8 @@
 
 use std::rc::Rc;
 
+use glam::{UVec2, Vec2};
 use speedy2d::color::Color;
-use speedy2d::dimen::{UVec2, Vec2};
 use speedy2d::font::{Font, FormattedTextBlock, TextLayout, TextOptions};
 use speedy2d::window::{MouseButton, WindowHandler, WindowHelper, WindowStartupInfo};
 use speedy2d::{Graphics2D, Window};

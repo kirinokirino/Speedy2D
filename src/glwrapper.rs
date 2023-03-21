@@ -24,7 +24,6 @@ use std::ptr;
 use std::rc::{Rc, Weak};
 
 use crate::color::Color;
-use crate::dimen::UVec2;
 use crate::error::{BacktraceError, Context, ErrorMessage};
 use crate::glbackend::constants::*;
 use crate::glbackend::types::{
@@ -33,6 +32,7 @@ use crate::glbackend::types::{
 };
 use crate::glbackend::GLBackend;
 use crate::{ImageDataType, RawBitmapData};
+use glam::UVec2;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 #[allow(dead_code)]

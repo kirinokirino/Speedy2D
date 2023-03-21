@@ -29,9 +29,9 @@ use rusttype::Scale;
 use smallvec::{smallvec, SmallVec};
 use unicode_normalization::UnicodeNormalization;
 
-use crate::dimen::{Vec2, Vector2};
 use crate::error::{BacktraceError, ErrorMessage};
-use crate::shape::{Rect, Rectangle};
+use crate::shape::Rect;
+use glam::Vec2;
 
 static FONT_ID_GENERATOR: AtomicUsize = AtomicUsize::new(10000);
 
@@ -1007,17 +1007,6 @@ impl FormattedTextLine {
         for glyph in self.glyphs.iter_mut() {
             glyph.add_offset_x(offset_x);
         }
-    }
-}
-
-impl<T: Copy> From<&rusttype::Rect<T>> for Rectangle<T> {
-    #[inline]
-    #[must_use]
-    fn from(rect: &rusttype::Rect<T>) -> Self {
-        Rectangle::new(
-            Vector2::new(rect.min.x, rect.min.y),
-            Vector2::new(rect.max.x, rect.max.y),
-        )
     }
 }
 

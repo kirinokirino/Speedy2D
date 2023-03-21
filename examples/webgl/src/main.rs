@@ -17,8 +17,8 @@
 #![deny(warnings)]
 
 use buttons::*;
+use glam::{vec2, Vec2};
 use speedy2d::color::Color;
-use speedy2d::dimen::{Vec2, Vector2};
 use speedy2d::font::Font;
 use speedy2d::time::Stopwatch;
 use speedy2d::window::{
@@ -120,9 +120,7 @@ impl WindowHandler<UserEvent> for MyHandler {
         let center = Vec2::new(400.0, 400.0);
         let offset = 200.0;
 
-        let position = center
-            + Vector2::<f64>::new(elapsed_secs.cos() * offset, elapsed_secs.sin() * offset)
-                .into_f32();
+        let position = center + vec2(elapsed_secs.cos() * offset, elapsed_secs.sin() * offset);
 
         graphics.draw_circle(
             position * self.scale,

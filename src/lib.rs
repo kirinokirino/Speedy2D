@@ -304,7 +304,6 @@ use {
 };
 
 use crate::color::Color;
-use crate::dimen::{UVec2, Vec2};
 use crate::error::{BacktraceError, ErrorMessage};
 #[cfg(feature = "text")]
 use crate::font::FormattedTextBlock;
@@ -314,7 +313,7 @@ use crate::glbackend::{GLBackendGLRS, GLBackendGlow};
 use crate::glwrapper::{GLContextManager, GLVersion};
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
 use crate::renderer2d::Renderer2D;
-use crate::shape::{Polygon, Rect, Rectangle};
+use crate::shape::{IRect, Polygon, Rect};
 #[cfg(target_arch = "wasm32")]
 use crate::web::WebCanvasElement;
 #[cfg(any(doc, doctest, feature = "windowing"))]
@@ -333,6 +332,7 @@ use crate::window_internal_doctest::{WebCanvasImpl, WindowGlutin};
 use crate::window_internal_glutin::WindowGlutin;
 #[cfg(all(feature = "windowing", target_arch = "wasm32", not(any(doc, doctest))))]
 use crate::window_internal_web::WebCanvasImpl;
+use glam::{UVec2, Vec2};
 
 /// Types representing colors.
 pub mod color;
@@ -925,25 +925,15 @@ impl Graphics2D {
     #[inline]
     pub fn draw_rectangle_image_subset_tinted(
         &mut self,
-        rect: Rectangle,
+        rect: Rect,
         color: Color,
-        image_coords_normalized: Rectangle,
+        image_coords_normalized: Rect,
         image: &ImageHandle,
     ) {
         self.draw_quad_image_tinted_four_color(
-            [
-                *rect.top_left(),
-                rect.top_right(),
-                *rect.bottom_right(),
-                rect.bottom_left(),
-            ],
+            rect.corners(),
             [color, color, color, color],
-            [
-                *image_coords_normalized.top_left(),
-                image_coords_normalized.top_right(),
-                *image_coords_normalized.bottom_right(),
-                image_coords_normalized.bottom_left(),
-            ],
+            image_coords_normalized.corners(),
             image,
         );
     }
@@ -956,16 +946,11 @@ impl Graphics2D {
     /// component in the image pixel by the corresponding color component in
     /// the `color` parameter.
     #[inline]
-    pub fn draw_rectangle_image_tinted(
-        &mut self,
-        rect: Rectangle,
-        color: Color,
-        image: &ImageHandle,
-    ) {
+    pub fn draw_rectangle_image_tinted(&mut self, rect: Rect, color: Color, image: &ImageHandle) {
         self.draw_rectangle_image_subset_tinted(
             rect,
             color,
-            Rectangle::new(Vec2::ZERO, Vec2::new(1.0, 1.0)),
+            Rect::new(Vec2::ZERO, Vec2::new(1.0, 1.0)),
             image,
         );
     }
@@ -973,7 +958,7 @@ impl Graphics2D {
     /// Draws an image at the specified location. The image will be
     /// scaled to fill the pixel coordinates in the provided rectangle.
     #[inline]
-    pub fn draw_rectangle_image(&mut self, rect: Rectangle, image: &ImageHandle) {
+    pub fn draw_rectangle_image(&mut self, rect: Rect, image: &ImageHandle) {
         self.draw_rectangle_image_tinted(rect, Color::WHITE, image);
     }
 
@@ -984,7 +969,7 @@ impl Graphics2D {
         let position = position.into();
 
         self.draw_rectangle_image(
-            Rectangle::new(position, position + image.size().into_f32()),
+            Rect::new(position, position + image.size().as_vec2()),
             image,
         );
     }
@@ -992,16 +977,8 @@ impl Graphics2D {
     /// Draws a single-color rectangle at the specified location. The
     /// coordinates of the rectangle are specified in pixels.
     #[inline]
-    pub fn draw_rectangle(&mut self, rect: Rectangle, color: Color) {
-        self.draw_quad(
-            [
-                *rect.top_left(),
-                rect.top_right(),
-                *rect.bottom_right(),
-                rect.bottom_left(),
-            ],
-            color,
-        );
+    pub fn draw_rectangle(&mut self, rect: Rect, color: Color) {
+        self.draw_quad(rect.corners(), color);
     }
 
     /// Draws a single-color line between the given points, specified in pixels.
@@ -1026,25 +1003,22 @@ impl Graphics2D {
     /// span two half-pixels. Drawing the same line between `(0.0, 10.5)`
     /// and `(100.0, 10.5)` will result in a pixel-aligned rectangle between
     /// `(0.0, 10.0)` and `(100.0, 11.0)`.
-    pub fn draw_line<VStart: Into<Vec2>, VEnd: Into<Vec2>>(
+    pub fn draw_line(
         &mut self,
-        start_position: VStart,
-        end_position: VEnd,
+        start_position: Vec2,
+        end_position: Vec2,
         thickness: f32,
         color: Color,
     ) {
-        let start_position = start_position.into();
-        let end_position = end_position.into();
-
-        let gradient_normalized = match (end_position - start_position).normalize() {
+        let gradient_normalized = match (end_position - start_position).try_normalize() {
             None => return,
             Some(gradient) => gradient,
         };
 
         let gradient_thickness = gradient_normalized * (thickness / 2.0);
 
-        let offset_anticlockwise = gradient_thickness.rotate_90_degrees_anticlockwise();
-        let offset_clockwise = gradient_thickness.rotate_90_degrees_clockwise();
+        let offset_anticlockwise = -gradient_thickness.perp();
+        let offset_clockwise = gradient_thickness.perp();
 
         let start_anticlockwise = start_position + offset_anticlockwise;
         let start_clockwise = start_position + offset_clockwise;
@@ -1140,7 +1114,7 @@ impl Graphics2D {
     /// Sets the current clip to the rectangle specified by the given
     /// coordinates. Rendering operations have no effect outside of the
     /// clipping area.
-    pub fn set_clip(&mut self, rect: Option<Rectangle<i32>>) {
+    pub fn set_clip(&mut self, rect: Option<IRect>) {
         self.renderer.set_clip(rect);
     }
 

@@ -18,8 +18,8 @@
 
 use std::time::Duration;
 
+use glam::UVec2;
 use speedy2d::color::Color;
-use speedy2d::dimen::UVec2;
 use speedy2d::window::{
     UserEventSender, WindowCreationOptions, WindowHandler, WindowHelper, WindowSize,
     WindowStartupInfo,

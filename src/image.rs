@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-use crate::dimen::UVec2;
 use crate::glwrapper::GLTexture;
+use glam::UVec2;
 
 /// The data type of the pixels making up the raw image data.
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]

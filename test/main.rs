@@ -25,10 +25,10 @@ use glutin::dpi::PhysicalSize;
 use glutin::event_loop::EventLoop;
 use image::{ColorType, GenericImageView, ImageFormat};
 use speedy2d::color::Color;
-use speedy2d::dimen::{Vec2, Vector2};
+use glam::{Vec2, UVec2};
 use speedy2d::font::{Font, TextAlignment, TextLayout, TextOptions};
 use speedy2d::image::{ImageDataType, ImageSmoothingMode};
-use speedy2d::shape::{Polygon, Rect, Rectangle};
+use speedy2d::shape::{Polygon, Rect, IRect, URect};
 use speedy2d::GLRenderer;
 
 const NOTO_SANS_REGULAR_BYTES: &[u8] = include_bytes!("../assets/fonts/NotoSans-Regular.ttf");
@@ -200,7 +200,7 @@ fn main() {
                     graphics.clear_screen(Color::WHITE);
 
                     graphics.draw_rectangle(
-                        Rectangle::from_tuples((10.0, 20.0), (30.0, 40.0)),
+                        Rect::from_tuples((10.0, 20.0), (30.0, 40.0)),
                         Color::MAGENTA,
                     );
 
@@ -311,12 +311,12 @@ fn main() {
                 graphics.clear_screen(Color::BLUE);
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((10.0, 20.0), (30.0, 40.0)),
+                    Rect::from_tuples((10.0, 20.0), (30.0, 40.0)),
                     Color::MAGENTA,
                 );
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((15.0, 30.0), (49.0, 48.0)),
+                    Rect::from_tuples((15.0, 30.0), (49.0, 48.0)),
                     Color::GREEN,
                 );
             });
@@ -415,7 +415,7 @@ fn main() {
                 graphics.clear_screen(Color::WHITE);
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples(
+                    Rect::from_tuples(
                         (0.0, 0.0),
                         (text.width().round(), text.height().round())
                     ),
@@ -423,7 +423,7 @@ fn main() {
                 );
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples(
+                    Rect::from_tuples(
                         (0.0, 0.0),
                         (
                             text.width().round(),
@@ -565,7 +565,7 @@ fn main() {
                 graphics.clear_screen(Color::WHITE);
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples(
+                    Rect::from_tuples(
                         (0.0, 0.0),
                         (first_text.width().round(), first_text.height().round())
                     ),
@@ -573,7 +573,7 @@ fn main() {
                 );
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples(
+                    Rect::from_tuples(
                         (0.0, 0.0),
                         (
                             first_text.width().round(),
@@ -588,7 +588,7 @@ fn main() {
                 let small_width = 90.0;
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((100.0, 200.0), (100.0 + small_width, 640.0)),
+                    Rect::from_tuples((100.0, 200.0), (100.0 + small_width, 640.0)),
                     Color::from_rgb(0.9, 0.9, 1.0)
                 );
 
@@ -606,7 +606,7 @@ fn main() {
                 let small_width = 30.0;
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((200.0, 200.0), (200.0 + small_width, 640.0)),
+                    Rect::from_tuples((200.0, 200.0), (200.0 + small_width, 640.0)),
                     Color::from_rgb(0.9, 0.9, 1.0)
                 );
 
@@ -660,7 +660,7 @@ fn main() {
                 graphics.clear_screen(Color::WHITE);
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((10.0, 10.0), (410.0, 640.0)),
+                    Rect::from_tuples((10.0, 10.0), (410.0, 640.0)),
                     Color::from_rgb(0.9, 0.9, 1.0)
                 );
 
@@ -700,7 +700,7 @@ fn main() {
                 graphics.clear_screen(Color::WHITE);
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((10.0, 10.0), (410.0, 640.0)),
+                    Rect::from_tuples((10.0, 10.0), (410.0, 640.0)),
                     Color::from_rgb(0.9, 0.9, 1.0)
                 );
 
@@ -747,7 +747,7 @@ fn main() {
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
-                graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
+                graphics.draw_text(Vec2::new(0.0, 0.0), Color::BLACK, &text);
             });
         }),
     });
@@ -767,7 +767,7 @@ fn main() {
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
-                graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
+                graphics.draw_text(Vec2::new(0.0, 0.0), Color::BLACK, &text);
             });
         }),
     });
@@ -790,7 +790,7 @@ fn main() {
                 graphics.clear_screen(Color::WHITE);
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples(
+                    Rect::from_tuples(
                         (0.0, 0.0),
                         (first_text.width().round(), first_text.height().round())
                     ),
@@ -798,7 +798,7 @@ fn main() {
                 );
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples(
+                    Rect::from_tuples(
                         (0.0, 0.0),
                         (
                             first_text.width().round(),
@@ -813,7 +813,7 @@ fn main() {
                 let small_width = 200.0;
 
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((100.0, 200.0), (100.0 + small_width, 640.0)),
+                    Rect::from_tuples((100.0, 200.0), (100.0 + small_width, 640.0)),
                     Color::from_rgb(0.9, 0.9, 1.0)
                 );
 
@@ -843,7 +843,7 @@ fn main() {
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
-                graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
+                graphics.draw_text(Vec2::new(0.0, 0.0), Color::BLACK, &text);
             });
         }),
     });
@@ -863,12 +863,12 @@ fn main() {
                     .create_image_from_raw_pixels(
                         ImageDataType::RGBA,
                         ImageSmoothingMode::Linear,
-                        Vector2::new(size.0, size.1),
+                        UVec2::new(size.0, size.1),
                         &image.to_rgba8(),
                     )
                     .unwrap();
 
-                graphics.draw_image(Vector2::new(200.0, 200.0), &texture);
+                graphics.draw_image(Vec2::new(200.0, 200.0), &texture);
             });
         }),
     });
@@ -889,12 +889,12 @@ fn main() {
                         .create_image_from_raw_pixels(
                             ImageDataType::RGBA,
                             ImageSmoothingMode::Linear,
-                            Vector2::new(size.0, size.1),
+                            UVec2::new(size.0, size.1),
                             &image.to_rgba8(),
                         )
                         .unwrap();
 
-                    graphics.draw_image(Vector2::new(200.0, 200.0), &texture);
+                    graphics.draw_image(Vec2::new(200.0, 200.0), &texture);
                 });
             }
         }),
@@ -915,12 +915,12 @@ fn main() {
                     .create_image_from_raw_pixels(
                         ImageDataType::RGB,
                         ImageSmoothingMode::Linear,
-                        Vector2::new(size.0, size.1),
+                        UVec2::new(size.0, size.1),
                         &image.to_rgb8(),
                     )
                     .unwrap();
 
-                graphics.draw_image(Vector2::new(200.0, 200.0), &texture);
+                graphics.draw_image(Vec2::new(200.0, 200.0), &texture);
             });
         }),
     });
@@ -941,7 +941,7 @@ fn main() {
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
-                graphics.draw_image(Vector2::new(200.0, 200.0), &image);
+                graphics.draw_image(Vec2::new(200.0, 200.0), &image);
             });
         }),
     });
@@ -964,7 +964,7 @@ fn main() {
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
-                graphics.draw_image(Vector2::new(200.0, 200.0), &image);
+                graphics.draw_image(Vec2::new(200.0, 200.0), &image);
             });
         }),
     });
@@ -984,12 +984,12 @@ fn main() {
                     .create_image_from_raw_pixels(
                         ImageDataType::RGB,
                         ImageSmoothingMode::NearestNeighbor,
-                        Vector2::new(size.0, size.1),
+                        UVec2::new(size.0, size.1),
                         &image.to_rgb8(),
                     )
                     .unwrap();
 
-                graphics.draw_image(Vector2::new(100.0, 100.0), &texture);
+                graphics.draw_image(Vec2::new(100.0, 100.0), &texture);
             });
         }),
     });
@@ -1002,11 +1002,11 @@ fn main() {
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::LIGHT_GRAY);
 
-                graphics.set_clip(Some(Rectangle::from_tuples((10, 10), (30, 20))));
+                graphics.set_clip(Some(IRect::from_tuples((10, 10), (30, 20))));
                 graphics
-                    .draw_rectangle(Rectangle::from_tuples((0.0, 0.0), (20.0, 40.0)), Color::RED);
+                    .draw_rectangle(Rect::from_tuples((0.0, 0.0), (20.0, 40.0)), Color::RED);
                 graphics.draw_rectangle(
-                    Rectangle::from_tuples((20.0, 0.0), (40.0, 40.0)),
+                    Rect::from_tuples((20.0, 0.0), (40.0, 40.0)),
                     Color::BLUE,
                 );
             });
@@ -1024,9 +1024,9 @@ fn main() {
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
-                graphics.set_clip(Some(Rectangle::from_tuples((25, 25), (250, 75))));
+                graphics.set_clip(Some(IRect::from_tuples((25, 25), (250, 75))));
                 graphics.clear_screen(Color::GREEN);
-                graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
+                graphics.draw_text(Vec2::new(0.0, 0.0), Color::BLACK, &text);
             });
         }),
     });
