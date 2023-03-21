@@ -22,22 +22,26 @@ windowing = ["glutin"]
 windowing-x11 = ["glutin/x11"]
 windowing-wayland = ["glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
 backtrace = ["dep:backtrace"]
-text = ["rusttype", "unicode-normalization"]
+text = ["owned_ttf_parser", "unicode-normalization"]
 
 [dependencies]
 gl = "0.14"
 glow = "0.7"
+glam = "0.23.0"
 log = "0.4"
-backtrace = { version = "0.3", optional = true }
-rusttype = { version = "0.9", optional = true }
-unicode-normalization = { version = "0.1", optional = true }
 num-traits = "0.2"
 earcutr = "0.4.1"
 smallvec = "1.10.0"
 
+# For backtrace feature
+backtrace = { version = "0.3", optional = true }
+
+# For text feature
+owned_ttf_parser = { version = "0.18.1", optional = true }
+unicode-normalization = { version = "0.1", optional = true }
+
 # For image_loading feature
 image = { version = "0.23", optional = true }
-glam = "0.23.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # For windowing feature

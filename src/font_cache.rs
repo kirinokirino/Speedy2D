@@ -23,9 +23,10 @@ use std::rc::Rc;
 
 use crate::color::Color;
 use crate::error::{BacktraceError, Context, ErrorMessage};
-use crate::font;
+use crate::font::FormattedGlyph;
 use crate::glwrapper::{GLContextManager, GLTexture, GLTextureImageFormatU8, GLTextureSmoothing};
 use crate::renderer2d::{Renderer2DAction, Renderer2DVertex};
+use crate::rusttype::{self, font, GlyphId, PositionedGlyph, Scale};
 use crate::shape::{IRect, Rect, URect};
 use crate::texture_packer::{TexturePacker, TexturePackerError};
 use glam::{vec2, IVec2, UVec2, Vec2};
@@ -58,16 +59,12 @@ struct GlyphCacheKey {
     subpixel_offset: (QuantizedDimension, QuantizedDimension),
 
     scale: QuantizedDimension,
-    glyph_id: rusttype::GlyphId,
+    glyph_id: GlyphId,
 }
 
 impl GlyphCacheKey {
     #[inline]
-    fn from(
-        font_id: usize,
-        positioned_glyph: &rusttype::PositionedGlyph,
-        screen_offset: Vec2,
-    ) -> Self {
+    fn from(font_id: usize, positioned_glyph: &PositionedGlyph, screen_offset: Vec2) -> Self {
         // Assuming scale is uniform
         let scale = QuantizedDimension::from_pixels(positioned_glyph.scale().y);
 
@@ -102,7 +99,7 @@ impl GlyphCache {
     #[inline]
     pub(crate) fn get_renderer2d_actions(
         &self,
-        glyph: &font::FormattedGlyph,
+        glyph: &FormattedGlyph,
         position: Vec2,
         color: Color,
         crop_window: Option<&Rect>,
@@ -130,40 +127,48 @@ impl GlyphCache {
             top_left.as_vec2().div(texture_size),
             bottom_right.as_vec2().div(texture_size),
         );
-        let a: () = position;
-        let b: () = positioned_glyph.position();
         let position = position + positioned_glyph.position();
 
         // We round the position here as the offset is between -0.5 and 0.5
-        let screen_region_start = position.round().as_ivec() + entry.bounding_box_offset;
+        let screen_region_start = position.round().as_ivec2() + entry.bounding_box_offset;
 
-        let mut screen_region = IRect::new(
-            screen_region_start,
-            screen_region_start + texture_entry.texture_area.size().into_i32(),
-        )
-        .into_f32();
+        let mut screen_region = Rect::new(
+            screen_region_start.as_vec2(),
+            (screen_region_start + texture_entry.texture_area.size().as_ivec2()).as_vec2(),
+        );
 
         if let Some(crop_window) = crop_window {
             if let Some(screen_intersection) = screen_region.intersect(crop_window) {
-                let left_diff = (screen_intersection.top_left().x - screen_region.top_left().x)
-                    / screen_region.width();
-                let right_diff = (screen_region.bottom_right().x
-                    - screen_intersection.bottom_right().x)
-                    / screen_region.width();
+                let Rect {
+                    top_left: intersection_top_left,
+                    bottom_right: intersection_bottom_right,
+                } = screen_intersection;
+                let Rect {
+                    top_left: region_top_left,
+                    bottom_right: region_bottom_right,
+                } = screen_region;
 
-                let top_diff = (screen_intersection.top_left().y - screen_region.top_left().y)
-                    / screen_region.height();
-                let bottom_diff = (screen_region.bottom_right().y
-                    - screen_intersection.bottom_right().y)
-                    / screen_region.height();
+                let left_diff =
+                    (intersection_top_left.x - region_top_left.x) / screen_region.width();
+                let right_diff =
+                    (region_bottom_right.x - intersection_bottom_right.x) / screen_region.width();
 
+                let top_diff =
+                    (intersection_top_left.y - region_top_left.y) / screen_region.height();
+                let bottom_diff =
+                    (region_bottom_right.y - intersection_bottom_right.y) / screen_region.height();
+
+                let Rect {
+                    top_left: texture_top_left,
+                    bottom_right: texture_bottom_right,
+                } = texture_region;
                 texture_region = Rect::new(
-                    texture_region.top_left()
+                    texture_top_left
                         + Vec2::new(
                             texture_region.width() * left_diff,
                             texture_region.height() * top_diff,
                         ),
-                    texture_region.bottom_right()
+                    texture_bottom_right
                         - Vec2::new(
                             texture_region.width() * right_diff,
                             texture_region.height() * bottom_diff,
@@ -176,26 +181,31 @@ impl GlyphCache {
             }
         }
 
+        let [screen_top_left, screen_top_right, screen_bottom_right, screen_bottom_left] =
+            screen_region.corners();
+        let [texture_top_left, texture_top_right, texture_bottom_right, texture_bottom_left] =
+            texture_region.corners();
+
         runner(Renderer2DAction {
             texture: Some(texture_cache.texture.clone()),
             vertices_clockwise: [
                 Renderer2DVertex {
-                    position: *screen_region.top_left(),
-                    texture_coord: *texture_region.top_left(),
+                    position: screen_top_left,
+                    texture_coord: texture_top_left,
                     color,
                     texture_mix: 1.0,
                     circle_mix: 0.0,
                 },
                 Renderer2DVertex {
-                    position: screen_region.top_right(),
-                    texture_coord: texture_region.top_right(),
+                    position: screen_top_right,
+                    texture_coord: texture_top_right,
                     color,
                     texture_mix: 1.0,
                     circle_mix: 0.0,
                 },
                 Renderer2DVertex {
-                    position: *screen_region.bottom_right(),
-                    texture_coord: *texture_region.bottom_right(),
+                    position: screen_bottom_right,
+                    texture_coord: texture_bottom_right,
                     color,
                     texture_mix: 1.0,
                     circle_mix: 0.0,
@@ -207,22 +217,22 @@ impl GlyphCache {
             texture: Some(texture_cache.texture.clone()),
             vertices_clockwise: [
                 Renderer2DVertex {
-                    position: *screen_region.bottom_right(),
-                    texture_coord: *texture_region.bottom_right(),
+                    position: screen_bottom_right,
+                    texture_coord: texture_bottom_right,
                     color,
                     texture_mix: 1.0,
                     circle_mix: 0.0,
                 },
                 Renderer2DVertex {
-                    position: screen_region.bottom_left(),
-                    texture_coord: texture_region.bottom_left(),
+                    position: screen_bottom_left,
+                    texture_coord: texture_bottom_left,
                     color,
                     texture_mix: 1.0,
                     circle_mix: 0.0,
                 },
                 Renderer2DVertex {
-                    position: *screen_region.top_left(),
-                    texture_coord: *texture_region.top_left(),
+                    position: screen_top_left,
+                    texture_coord: texture_top_left,
                     color,
                     texture_mix: 1.0,
                     circle_mix: 0.0,
@@ -234,7 +244,7 @@ impl GlyphCache {
     pub(crate) fn add_to_cache(
         &mut self,
         _context: &GLContextManager,
-        formatted_glyph: &font::FormattedGlyph,
+        formatted_glyph: &FormattedGlyph,
         position: Vec2,
     ) {
         let key = GlyphCacheKey::from(formatted_glyph.font_id(), formatted_glyph.glyph(), position);
@@ -254,7 +264,7 @@ impl GlyphCache {
                     .unpositioned()
                     .unscaled()
                     .clone()
-                    .scaled(rusttype::Scale::uniform(key.scale.to_pixels()))
+                    .scaled(Scale::uniform(key.scale.to_pixels()))
                     .positioned(vec2(
                         key.subpixel_offset.0.to_pixels(),
                         key.subpixel_offset.1.to_pixels(),
@@ -264,7 +274,6 @@ impl GlyphCache {
                     None => return, // This is valid for some glyphs, e.g. space
                     Some(bounding_box) => bounding_box,
                 };
-
                 let bounding_box_size =
                     UVec2::new(bounding_box.width() as u32, bounding_box.height() as u32);
 
@@ -285,9 +294,11 @@ impl GlyphCache {
 
                 bitmap.draw_glyph(&glyph);
 
+                let Rect { top_left, .. } = bounding_box;
+                let bounding_box_offset = top_left.as_ivec2();
                 entry.insert(GlyphCacheEntry {
                     glyph_bitmap: Rc::new(bitmap),
-                    bounding_box_offset: IVec2::new(bounding_box.min.x, bounding_box.min.y),
+                    bounding_box_offset,
                     texture_id: None,
                 });
             }
@@ -478,7 +489,7 @@ impl BitmapRGBA {
     }
 
     #[inline]
-    fn draw_glyph(&mut self, glyph: &rusttype::PositionedGlyph) {
+    fn draw_glyph(&mut self, glyph: &PositionedGlyph) {
         glyph.draw(|x, y, alpha| {
             let start = (4 * (self.size.x * y + x)) as usize;
             self.data[start] = 255;
@@ -616,9 +627,8 @@ impl GlyphCacheTexture {
         glyph_bitmap: &Rc<BitmapRGBA>,
     ) -> Result<(), GlyphCacheTextureAppendError> {
         let texture_area = self.packer.try_allocate(glyph_bitmap.size)?;
-
-        self.bitmap
-            .draw_bitmap_at(glyph_bitmap, texture_area.top_left());
+        let URect { top_left, .. } = texture_area;
+        self.bitmap.draw_bitmap_at(glyph_bitmap, &top_left);
 
         self.entries
             .insert(key.clone(), GlyphTextureCacheEntry { texture_area });

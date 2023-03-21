@@ -25,13 +25,14 @@ use std::slice::Iter;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::vec::IntoIter;
 
-use rusttype::Scale;
+use crate::rusttype::font::RusttypeFont;
+use crate::rusttype::{self, Glyph, GlyphId, PositionedGlyph, Scale, ScaledGlyph};
 use smallvec::{smallvec, SmallVec};
 use unicode_normalization::UnicodeNormalization;
 
 use crate::error::{BacktraceError, ErrorMessage};
 use crate::shape::Rect;
-use glam::Vec2;
+use glam::{vec2, Vec2};
 
 static FONT_ID_GENERATOR: AtomicUsize = AtomicUsize::new(10000);
 
@@ -159,7 +160,7 @@ impl Word {
 
 /// A struct representing a glyph in a font.
 pub struct FontGlyph {
-    glyph: rusttype::Glyph<'static>,
+    glyph: Glyph<'static>,
     font: Font,
 }
 
@@ -221,7 +222,7 @@ struct LineLayoutMetrics {
     max_ascent: f32,
     min_descent: f32,
     max_line_gap: f32,
-    last_glyph_id: Option<rusttype::GlyphId>,
+    last_glyph_id: Option<GlyphId>,
     last_font_id: Option<FontId>,
 }
 
@@ -245,7 +246,7 @@ impl LineLayoutMetrics {
 
     fn update_and_get_render_pos_x(
         &mut self,
-        glyph: &rusttype::ScaledGlyph,
+        glyph: &ScaledGlyph,
         font_id: FontId,
         scale: &Scale,
         options: &TextOptions,
@@ -354,7 +355,7 @@ fn try_layout_word_internal<T: TextLayout + ?Sized>(
 
         let formatted_glyph = FormattedGlyph {
             user_index: *user_index,
-            glyph: scaled_glyph.positioned(rusttype::point(glyph_x_pos_start, 0.0)),
+            glyph: scaled_glyph.positioned(vec2(glyph_x_pos_start, 0.0)),
             font_id: glyph.font.id(),
         };
 
@@ -603,7 +604,7 @@ pub struct Font {
 #[derive(Debug)]
 struct FontImpl {
     id: usize,
-    font: rusttype::Font<'static>,
+    font: RusttypeFont<'static>,
 }
 
 impl Font {
@@ -612,7 +613,7 @@ impl Font {
     /// The font may be in TrueType or OpenType format. Support for OpenType
     /// fonts may be limited.
     pub fn new(bytes: &[u8]) -> Result<Font, BacktraceError<ErrorMessage>> {
-        let font = rusttype::Font::try_from_vec(bytes.to_vec())
+        let font = RusttypeFont::try_from_vec(bytes.to_vec())
             .ok_or_else(|| ErrorMessage::msg("Failed to load font"))?;
 
         Ok(Font {
@@ -629,7 +630,7 @@ impl Font {
     }
 
     #[inline]
-    fn font(&self) -> &rusttype::Font<'static> {
+    fn font(&self) -> &RusttypeFont<'static> {
         &self.data.font
     }
 }
@@ -812,7 +813,7 @@ impl Default for TextOptions {
 /// Represents a glyph which has been laid out as part of a line of text.
 #[derive(Clone)]
 pub struct FormattedGlyph {
-    glyph: rusttype::PositionedGlyph<'static>,
+    glyph: PositionedGlyph<'static>,
     font_id: FontId,
     user_index: UserGlyphIndex,
 }
@@ -820,7 +821,7 @@ pub struct FormattedGlyph {
 impl FormattedGlyph {
     #[inline]
     #[must_use]
-    pub(crate) fn glyph(&self) -> &rusttype::PositionedGlyph<'static> {
+    pub(crate) fn glyph(&self) -> &PositionedGlyph<'static> {
         &self.glyph
     }
 
@@ -867,8 +868,8 @@ impl FormattedGlyph {
     pub fn pixel_bounding_box(&self) -> Option<Rect> {
         self.glyph.pixel_bounding_box().map(|r| {
             Rect::from_tuples(
-                (r.min.x as f32, r.min.y as f32),
-                (r.max.x as f32, r.max.y as f32),
+                (r.top_left.x as f32, r.top_left.y as f32),
+                (r.bottom_right.x as f32, r.bottom_right.y as f32),
             )
         })
     }
@@ -876,15 +877,14 @@ impl FormattedGlyph {
     #[inline]
     fn reposition_y(&mut self, y_pos: f32) {
         let existing_pos = self.glyph.position();
-        self.glyph
-            .set_position(rusttype::point(existing_pos.x, y_pos));
+        self.glyph.set_position(vec2(existing_pos.x, y_pos));
     }
 
     #[inline]
     fn add_offset_x(&mut self, offset_x: f32) {
         let existing_pos = self.glyph.position();
         self.glyph
-            .set_position(rusttype::point(existing_pos.x + offset_x, existing_pos.y));
+            .set_position(vec2(existing_pos.x + offset_x, existing_pos.y));
     }
 }
 

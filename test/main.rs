@@ -21,14 +21,14 @@ compile_error!("The automated tests currently support Linux x86_64 only");
 
 use std::convert::TryInto;
 
+use glam::{UVec2, Vec2};
 use glutin::dpi::PhysicalSize;
 use glutin::event_loop::EventLoop;
 use image::{ColorType, GenericImageView, ImageFormat};
 use speedy2d::color::Color;
-use glam::{Vec2, UVec2};
 use speedy2d::font::{Font, TextAlignment, TextLayout, TextOptions};
 use speedy2d::image::{ImageDataType, ImageSmoothingMode};
-use speedy2d::shape::{Polygon, Rect, IRect, URect};
+use speedy2d::shape::{IRect, Polygon, Rect};
 use speedy2d::GLRenderer;
 
 const NOTO_SANS_REGULAR_BYTES: &[u8] = include_bytes!("../assets/fonts/NotoSans-Regular.ttf");
@@ -315,10 +315,8 @@ fn main() {
                     Color::MAGENTA,
                 );
 
-                graphics.draw_rectangle(
-                    Rect::from_tuples((15.0, 30.0), (49.0, 48.0)),
-                    Color::GREEN,
-                );
+                graphics
+                    .draw_rectangle(Rect::from_tuples((15.0, 30.0), (49.0, 48.0)), Color::GREEN);
             });
         }),
     });
@@ -331,11 +329,21 @@ fn main() {
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
 
-                graphics.draw_line((10.0, 10.5), (30.0, 10.5), 1.0, Color::BLUE);
+                graphics.draw_line((10.0, 10.5).into(), (30.0, 10.5).into(), 1.0, Color::BLUE);
 
-                graphics.draw_line((20.0, 14.0), (40.0, 14.0), 2.0, Color::DARK_GRAY);
+                graphics.draw_line(
+                    (20.0, 14.0).into(),
+                    (40.0, 14.0).into(),
+                    2.0,
+                    Color::DARK_GRAY,
+                );
 
-                graphics.draw_line((1.0, 20.5), (49.0, 20.5), 5.0, Color::LIGHT_GRAY);
+                graphics.draw_line(
+                    (1.0, 20.5).into(),
+                    (49.0, 20.5).into(),
+                    5.0,
+                    Color::LIGHT_GRAY,
+                );
             });
         }),
     });
@@ -348,11 +356,21 @@ fn main() {
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
 
-                graphics.draw_line((10.5, 10.0), (10.5, 30.0), 1.0, Color::BLUE);
+                graphics.draw_line((10.5, 10.0).into(), (10.5, 30.0).into(), 1.0, Color::BLUE);
 
-                graphics.draw_line((14.0, 20.0), (14.0, 40.0), 2.0, Color::DARK_GRAY);
+                graphics.draw_line(
+                    (14.0, 20.0).into(),
+                    (14.0, 40.0).into(),
+                    2.0,
+                    Color::DARK_GRAY,
+                );
 
-                graphics.draw_line((20.5, 1.0), (20.5, 49.0), 5.0, Color::LIGHT_GRAY);
+                graphics.draw_line(
+                    (20.5, 1.0).into(),
+                    (20.5, 49.0).into(),
+                    5.0,
+                    Color::LIGHT_GRAY,
+                );
             });
         }),
     });
@@ -1003,12 +1021,8 @@ fn main() {
                 graphics.clear_screen(Color::LIGHT_GRAY);
 
                 graphics.set_clip(Some(IRect::from_tuples((10, 10), (30, 20))));
-                graphics
-                    .draw_rectangle(Rect::from_tuples((0.0, 0.0), (20.0, 40.0)), Color::RED);
-                graphics.draw_rectangle(
-                    Rect::from_tuples((20.0, 0.0), (40.0, 40.0)),
-                    Color::BLUE,
-                );
+                graphics.draw_rectangle(Rect::from_tuples((0.0, 0.0), (20.0, 40.0)), Color::RED);
+                graphics.draw_rectangle(Rect::from_tuples((20.0, 0.0), (40.0, 40.0)), Color::BLUE);
             });
         }),
     });
