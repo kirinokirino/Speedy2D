@@ -34,28 +34,24 @@ pub type UVec2 = Vector2<u32>;
 /// position.
 #[repr(C)]
 #[derive(PartialEq, Eq, Clone, Copy, Hash, Debug)]
-pub struct Vector2<T>
-{
+pub struct Vector2<T> {
     /// The horizontal component of the vector.
     pub x: T,
     /// The vertical component of the vector.
-    pub y: T
+    pub y: T,
 }
 
-impl<T> Vector2<T>
-{
+impl<T> Vector2<T> {
     /// Instantiates a new `Vector2` from the specified horizontal and vertical
     /// components.
     #[inline]
     #[must_use]
-    pub const fn new(x: T, y: T) -> Self
-    {
+    pub const fn new(x: T, y: T) -> Self {
         Vector2 { x, y }
     }
 }
 
-impl<T: PrimitiveZero> Vector2<T>
-{
+impl<T: PrimitiveZero> Vector2<T> {
     /// A constant representing a vector of zero magnitude. Each component is
     /// set to zero.
     pub const ZERO: Vector2<T> = Vector2::new(T::ZERO, T::ZERO);
@@ -64,8 +60,7 @@ impl<T: PrimitiveZero> Vector2<T>
     /// setting the vertical component to zero.
     #[inline]
     #[must_use]
-    pub fn new_x(x: T) -> Self
-    {
+    pub fn new_x(x: T) -> Self {
         Vector2 { x, y: T::ZERO }
     }
 
@@ -73,27 +68,23 @@ impl<T: PrimitiveZero> Vector2<T>
     /// setting the horizontal component to zero.
     #[inline]
     #[must_use]
-    pub fn new_y(y: T) -> Self
-    {
+    pub fn new_y(y: T) -> Self {
         Vector2 { x: T::ZERO, y }
     }
 }
 
-impl Vec2
-{
+impl Vec2 {
     /// Returns the magnitude of the vector, squared.
     #[inline]
     #[must_use]
-    pub fn magnitude_squared(&self) -> f32
-    {
+    pub fn magnitude_squared(&self) -> f32 {
         self.x * self.x + self.y * self.y
     }
 
     /// Returns the magnitude of the vector.
     #[inline]
     #[must_use]
-    pub fn magnitude(&self) -> f32
-    {
+    pub fn magnitude(&self) -> f32 {
         self.magnitude_squared().sqrt()
     }
 
@@ -102,8 +93,7 @@ impl Vec2
     /// division by zero.
     #[inline]
     #[must_use]
-    pub fn normalize(&self) -> Option<Vec2>
-    {
+    pub fn normalize(&self) -> Option<Vec2> {
         let magnitude = self.magnitude();
 
         if magnitude == 0.0 {
@@ -114,180 +104,152 @@ impl Vec2
     }
 }
 
-impl<T: std::ops::Neg<Output = T> + Copy> Vector2<T>
-{
+impl<T: std::ops::Neg<Output = T> + Copy> Vector2<T> {
     /// Rotates the vector by 90 degrees in the clockwise direction.
     #[inline]
     #[must_use]
-    pub fn rotate_90_degrees_clockwise(&self) -> Vector2<T>
-    {
+    pub fn rotate_90_degrees_clockwise(&self) -> Vector2<T> {
         Vector2::new(-self.y, self.x)
     }
 
     /// Rotates the vector by 90 degrees in the anti-clockwise direction.
     #[inline]
     #[must_use]
-    pub fn rotate_90_degrees_anticlockwise(&self) -> Vector2<T>
-    {
+    pub fn rotate_90_degrees_anticlockwise(&self) -> Vector2<T> {
         Vector2::new(self.y, -self.x)
     }
 }
 
-impl<T: num_traits::AsPrimitive<f32>> Vector2<T>
-{
+impl<T: num_traits::AsPrimitive<f32>> Vector2<T> {
     /// Returns a new vector with each element cast to `f32`, using the `as`
     /// operator.
     #[inline]
     #[must_use]
-    pub fn into_f32(self) -> Vec2
-    {
+    pub fn into_f32(self) -> Vec2 {
         Vector2::new(self.x.as_(), self.y.as_())
     }
 }
 
-impl<T: num_traits::AsPrimitive<i32>> Vector2<T>
-{
+impl<T: num_traits::AsPrimitive<i32>> Vector2<T> {
     /// Returns a new vector with each element cast to `i32`, using the `as`
     /// operator.
     #[inline]
     #[must_use]
-    pub fn into_i32(self) -> IVec2
-    {
+    pub fn into_i32(self) -> IVec2 {
         Vector2::new(self.x.as_(), self.y.as_())
     }
 }
 
-impl<T: num_traits::AsPrimitive<u32>> Vector2<T>
-{
+impl<T: num_traits::AsPrimitive<u32>> Vector2<T> {
     /// Returns a new vector with each element cast to `u32`, using the `as`
     /// operator.
     #[inline]
     #[must_use]
-    pub fn into_u32(self) -> UVec2
-    {
+    pub fn into_u32(self) -> UVec2 {
         Vector2::new(self.x.as_(), self.y.as_())
     }
 }
 
-impl<T: TryInto<i32>> Vector2<T>
-{
+impl<T: TryInto<i32>> Vector2<T> {
     /// Attempts to convert each element of this vector to an `i32`, returning
     /// an error if this fails.
     #[inline]
-    pub fn try_into_i32(self) -> Result<IVec2, T::Error>
-    {
+    pub fn try_into_i32(self) -> Result<IVec2, T::Error> {
         Ok(Vector2::new(self.x.try_into()?, self.y.try_into()?))
     }
 }
 
 impl<T> From<(T, T)> for Vector2<T>
 where
-    T: Copy
+    T: Copy,
 {
     #[inline]
     #[must_use]
-    fn from(value: (T, T)) -> Self
-    {
+    fn from(value: (T, T)) -> Self {
         Vector2::new(value.0, value.1)
     }
 }
 
 impl<T> From<&(T, T)> for Vector2<T>
 where
-    T: Copy
+    T: Copy,
 {
     #[inline]
     #[must_use]
-    fn from(value: &(T, T)) -> Self
-    {
+    fn from(value: &(T, T)) -> Self {
         Vector2::new(value.0, value.1)
     }
 }
 
 impl<T> From<&Self> for Vector2<T>
 where
-    T: Copy
+    T: Copy,
 {
     #[inline]
     #[must_use]
-    fn from(value: &Self) -> Self
-    {
+    fn from(value: &Self) -> Self {
         *value
     }
 }
 
 impl<T> From<&mut Self> for Vector2<T>
 where
-    T: Copy
+    T: Copy,
 {
     #[inline]
     #[must_use]
-    fn from(value: &mut Self) -> Self
-    {
+    fn from(value: &mut Self) -> Self {
         *value
     }
 }
 
-impl<T: Copy + std::ops::Add<Output = T>, R: Into<Self>> std::ops::Add<R> for Vector2<T>
-{
+impl<T: Copy + std::ops::Add<Output = T>, R: Into<Self>> std::ops::Add<R> for Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn add(self, rhs: R) -> Self::Output
-    {
+    fn add(self, rhs: R) -> Self::Output {
         let rhs = rhs.into();
         Vector2::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
-impl<T: Copy + std::ops::Add<Output = T>, R: Into<Vector2<T>>> std::ops::Add<R>
-    for &Vector2<T>
-{
+impl<T: Copy + std::ops::Add<Output = T>, R: Into<Vector2<T>>> std::ops::Add<R> for &Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn add(self, rhs: R) -> Self::Output
-    {
+    fn add(self, rhs: R) -> Self::Output {
         let rhs = rhs.into();
         Vector2::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
-impl<T: Copy + std::ops::Sub<Output = T>, R: Into<Self>> std::ops::Sub<R> for Vector2<T>
-{
+impl<T: Copy + std::ops::Sub<Output = T>, R: Into<Self>> std::ops::Sub<R> for Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn sub(self, rhs: R) -> Self::Output
-    {
+    fn sub(self, rhs: R) -> Self::Output {
         let rhs = rhs.into();
         Vector2::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
-impl<T: Copy + std::ops::Sub<Output = T>, R: Into<Vector2<T>>> std::ops::Sub<R>
-    for &Vector2<T>
-{
+impl<T: Copy + std::ops::Sub<Output = T>, R: Into<Vector2<T>>> std::ops::Sub<R> for &Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn sub(self, rhs: R) -> Self::Output
-    {
+    fn sub(self, rhs: R) -> Self::Output {
         let rhs = rhs.into();
         Vector2::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
-impl<T: Copy + std::ops::AddAssign, R: Into<Vector2<T>>> std::ops::AddAssign<R>
-    for Vector2<T>
-{
+impl<T: Copy + std::ops::AddAssign, R: Into<Vector2<T>>> std::ops::AddAssign<R> for Vector2<T> {
     #[inline]
-    fn add_assign(&mut self, rhs: R)
-    {
+    fn add_assign(&mut self, rhs: R) {
         let rhs = rhs.into();
         self.x += rhs.x;
         self.y += rhs.y;
@@ -298,20 +260,16 @@ impl<T: Copy + std::ops::AddAssign, R: Into<Vector2<T>>> std::ops::AddAssign<R>
     for &mut Vector2<T>
 {
     #[inline]
-    fn add_assign(&mut self, rhs: R)
-    {
+    fn add_assign(&mut self, rhs: R) {
         let rhs = rhs.into();
         self.x += rhs.x;
         self.y += rhs.y;
     }
 }
 
-impl<T: Copy + std::ops::SubAssign, R: Into<Vector2<T>>> std::ops::SubAssign<R>
-    for Vector2<T>
-{
+impl<T: Copy + std::ops::SubAssign, R: Into<Vector2<T>>> std::ops::SubAssign<R> for Vector2<T> {
     #[inline]
-    fn sub_assign(&mut self, rhs: R)
-    {
+    fn sub_assign(&mut self, rhs: R) {
         let rhs = rhs.into();
         self.x -= rhs.x;
         self.y -= rhs.y;
@@ -322,129 +280,106 @@ impl<T: Copy + std::ops::SubAssign, R: Into<Vector2<T>>> std::ops::SubAssign<R>
     for &mut Vector2<T>
 {
     #[inline]
-    fn sub_assign(&mut self, rhs: R)
-    {
+    fn sub_assign(&mut self, rhs: R) {
         let rhs = rhs.into();
         self.x -= rhs.x;
         self.y -= rhs.y;
     }
 }
 
-impl<T: Copy + std::ops::MulAssign> std::ops::MulAssign<T> for Vector2<T>
-{
+impl<T: Copy + std::ops::MulAssign> std::ops::MulAssign<T> for Vector2<T> {
     #[inline]
-    fn mul_assign(&mut self, factor: T)
-    {
+    fn mul_assign(&mut self, factor: T) {
         self.x *= factor;
         self.y *= factor;
     }
 }
 
-impl<T: Copy + std::ops::MulAssign> std::ops::MulAssign<T> for &mut Vector2<T>
-{
+impl<T: Copy + std::ops::MulAssign> std::ops::MulAssign<T> for &mut Vector2<T> {
     #[inline]
-    fn mul_assign(&mut self, factor: T)
-    {
+    fn mul_assign(&mut self, factor: T) {
         self.x *= factor;
         self.y *= factor;
     }
 }
 
-impl<T: Copy + std::ops::DivAssign> std::ops::DivAssign<T> for Vector2<T>
-{
+impl<T: Copy + std::ops::DivAssign> std::ops::DivAssign<T> for Vector2<T> {
     #[inline]
-    fn div_assign(&mut self, divisor: T)
-    {
+    fn div_assign(&mut self, divisor: T) {
         self.x /= divisor;
         self.y /= divisor;
     }
 }
 
-impl<T: Copy + std::ops::DivAssign> std::ops::DivAssign<T> for &mut Vector2<T>
-{
+impl<T: Copy + std::ops::DivAssign> std::ops::DivAssign<T> for &mut Vector2<T> {
     #[inline]
-    fn div_assign(&mut self, divisor: T)
-    {
+    fn div_assign(&mut self, divisor: T) {
         self.x /= divisor;
         self.y /= divisor;
     }
 }
 
-impl<T: Copy + std::ops::Mul<Output = T>> std::ops::Mul<T> for &Vector2<T>
-{
+impl<T: Copy + std::ops::Mul<Output = T>> std::ops::Mul<T> for &Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn mul(self, rhs: T) -> Self::Output
-    {
+    fn mul(self, rhs: T) -> Self::Output {
         Vector2::new(self.x * rhs, self.y * rhs)
     }
 }
 
-impl<T: Copy + std::ops::Mul<Output = T>> std::ops::Mul<T> for Vector2<T>
-{
+impl<T: Copy + std::ops::Mul<Output = T>> std::ops::Mul<T> for Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn mul(self, rhs: T) -> Self::Output
-    {
+    fn mul(self, rhs: T) -> Self::Output {
         Vector2::new(self.x * rhs, self.y * rhs)
     }
 }
 
-impl<T: Copy + std::ops::Div<Output = T>> std::ops::Div<T> for &Vector2<T>
-{
+impl<T: Copy + std::ops::Div<Output = T>> std::ops::Div<T> for &Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn div(self, rhs: T) -> Self::Output
-    {
+    fn div(self, rhs: T) -> Self::Output {
         Vector2::new(self.x / rhs, self.y / rhs)
     }
 }
 
-impl<T: Copy + std::ops::Div<Output = T>> std::ops::Div<T> for Vector2<T>
-{
+impl<T: Copy + std::ops::Div<Output = T>> std::ops::Div<T> for Vector2<T> {
     type Output = Vector2<T>;
 
     #[inline]
     #[must_use]
-    fn div(self, rhs: T) -> Self::Output
-    {
+    fn div(self, rhs: T) -> Self::Output {
         Vector2::new(self.x / rhs, self.y / rhs)
     }
 }
 
-impl<T: RoundFloat> RoundFloat for Vector2<T>
-{
-    fn round(&self) -> Self
-    {
+impl<T: RoundFloat> RoundFloat for Vector2<T> {
+    fn round(&self) -> Self {
         Vector2::new(self.x.round(), self.y.round())
     }
 }
 
 #[cfg(feature = "text")]
-impl<T> From<Point<T>> for Vector2<T>
-{
+impl<T> From<Point<T>> for Vector2<T> {
     #[inline]
     #[must_use]
-    fn from(point: Point<T>) -> Self
-    {
+    fn from(point: Point<T>) -> Self {
         Vector2::new(point.x, point.y)
     }
 }
 
 #[cfg(test)]
-mod test
-{
+mod test {
     use super::*;
 
     #[test]
-    fn test_arithmetic()
-    {
+    fn test_arithmetic() {
         assert_eq!(
             Vector2::new(15, 20),
             Vector2::new(10, 4) + Vector2::new(5, 16)
@@ -462,8 +397,7 @@ mod test
 
     #[allow(clippy::op_ref)]
     #[test]
-    fn test_arithmetic_ref()
-    {
+    fn test_arithmetic_ref() {
         assert_eq!(
             Vector2::new(15, 20),
             Vector2::new(10, 4) + &Vector2::new(5, 16)
@@ -497,8 +431,7 @@ mod test
 
     #[allow(clippy::op_ref)]
     #[test]
-    fn test_arithmetic_tuples()
-    {
+    fn test_arithmetic_tuples() {
         assert_eq!(Vector2::new(15, 20), Vector2::new(10, 4) + (5, 16));
 
         assert_eq!(Vector2::new(15, 20), Vector2::new(10, 4) + &(5, 16));
@@ -516,8 +449,7 @@ mod test
         assert_eq!(Vector2::new(5, -12), &Vector2::new(10, 4) - &(5, 16));
     }
     #[test]
-    fn test_add_assign()
-    {
+    fn test_add_assign() {
         let mut left = Vector2::new(1, 2);
         let right = Vector2::new(3, 4);
         left += right;
@@ -537,8 +469,7 @@ mod test
     }
 
     #[test]
-    fn test_sub_assign()
-    {
+    fn test_sub_assign() {
         let mut left = Vector2::new(9, 8);
         let right = Vector2::new(1, 2);
         left -= right;
@@ -558,8 +489,7 @@ mod test
     }
 
     #[test]
-    fn test_mul_assign()
-    {
+    fn test_mul_assign() {
         let mut left = Vector2::new(2, 3);
         left *= 5;
         assert_eq!(left, Vector2::new(10, 15));
@@ -571,8 +501,7 @@ mod test
     }
 
     #[test]
-    fn test_div_assign()
-    {
+    fn test_div_assign() {
         let mut left = Vector2::new(12, 8);
         left /= 2;
         assert_eq!(left, Vector2::new(6, 4));

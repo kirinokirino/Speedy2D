@@ -19,52 +19,43 @@ use crate::shape::Rectangle;
 use crate::texture_packer::TexturePackerError::NotEnoughSpace;
 
 #[derive(Debug)]
-struct FreeRegion
-{
-    rect: Rectangle<u32>
+struct FreeRegion {
+    rect: Rectangle<u32>,
 }
 
-impl FreeRegion
-{
+impl FreeRegion {
     #[inline]
-    fn from_rectangle(rect: Rectangle<u32>) -> Self
-    {
+    fn from_rectangle(rect: Rectangle<u32>) -> Self {
         FreeRegion { rect }
     }
 
     #[inline]
-    fn new(width: u32, height: u32) -> Self
-    {
+    fn new(width: u32, height: u32) -> Self {
         FreeRegion::from_rectangle(Rectangle::new(UVec2::ZERO, UVec2::new(width, height)))
     }
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
-pub(crate) enum TexturePackerError
-{
-    NotEnoughSpace
+pub(crate) enum TexturePackerError {
+    NotEnoughSpace,
 }
 
 #[derive(Debug)]
-pub(crate) struct TexturePacker
-{
-    areas: Vec<FreeRegion>
+pub(crate) struct TexturePacker {
+    areas: Vec<FreeRegion>,
 }
 
-impl TexturePacker
-{
-    pub(crate) fn new(width: u32, height: u32) -> Self
-    {
+impl TexturePacker {
+    pub(crate) fn new(width: u32, height: u32) -> Self {
         TexturePacker {
-            areas: vec![FreeRegion::new(width, height)]
+            areas: vec![FreeRegion::new(width, height)],
         }
     }
 
     pub(crate) fn try_allocate(
         &mut self,
-        size: UVec2
-    ) -> Result<Rectangle<u32>, TexturePackerError>
-    {
+        size: UVec2,
+    ) -> Result<Rectangle<u32>, TexturePackerError> {
         if size.x == 0 || size.y == 0 {
             return Ok(Rectangle::new(UVec2::ZERO, size));
         }
@@ -86,8 +77,7 @@ impl TexturePacker
             }
 
             let update_best = if let Some(current_best) = &best_area {
-                current_best.rect.width() >= area_width
-                    && current_best.rect.height() >= area_height
+                current_best.rect.width() >= area_width && current_best.rect.height() >= area_height
             } else {
                 true
             };
@@ -105,17 +95,17 @@ impl TexturePacker
         let space_underneath = Rectangle::new(
             UVec2::new(
                 best_area.rect.top_left().x,
-                alloc_area_with_border.bottom_right().y
+                alloc_area_with_border.bottom_right().y,
             ),
-            *best_area.rect.bottom_right()
+            *best_area.rect.bottom_right(),
         );
 
         let space_right = Rectangle::new(
             UVec2::new(
                 alloc_area_with_border.bottom_right().x,
-                best_area.rect.top_left().y
+                best_area.rect.top_left().y,
             ),
-            space_underneath.top_right()
+            space_underneath.top_right(),
         );
 
         if space_right.is_zero_area() {
@@ -131,20 +121,18 @@ impl TexturePacker
 
         Ok(Rectangle::new(
             alloc_area_with_border.top_left() + UVec2::new(1, 1),
-            alloc_area_with_border.bottom_right() - UVec2::new(1, 1)
+            alloc_area_with_border.bottom_right() - UVec2::new(1, 1),
         ))
     }
 }
 
 #[cfg(test)]
-mod test
-{
+mod test {
 
     use super::*;
 
     #[test]
-    fn pack_test_fill_four_squares()
-    {
+    fn pack_test_fill_four_squares() {
         let mut packer = TexturePacker::new(64, 64);
 
         assert_eq!(
@@ -171,8 +159,7 @@ mod test
     }
 
     #[test]
-    fn pack_test_nonfill_four_squares()
-    {
+    fn pack_test_nonfill_four_squares() {
         let mut packer = TexturePacker::new(64, 64);
 
         assert_eq!(
@@ -199,8 +186,7 @@ mod test
     }
 
     #[test]
-    fn pack_test_uneven_squares()
-    {
+    fn pack_test_uneven_squares() {
         let mut packer = TexturePacker::new(64, 64);
 
         assert_eq!(

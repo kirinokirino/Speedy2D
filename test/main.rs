@@ -31,48 +31,38 @@ use speedy2d::image::{ImageDataType, ImageSmoothingMode};
 use speedy2d::shape::{Polygon, Rect, Rectangle};
 use speedy2d::GLRenderer;
 
-const NOTO_SANS_REGULAR_BYTES: &[u8] =
-    include_bytes!("../assets/fonts/NotoSans-Regular.ttf");
+const NOTO_SANS_REGULAR_BYTES: &[u8] = include_bytes!("../assets/fonts/NotoSans-Regular.ttf");
 
-fn get_expected_image_path<S: AsRef<str>>(name: S) -> String
-{
+fn get_expected_image_path<S: AsRef<str>>(name: S) -> String {
     format!("test/assets/expected_images/test_{}.png", name.as_ref())
 }
 
-fn write_rgba_to_png<S: AsRef<str>>(name: S, width: u32, height: u32, buf: &[u8])
-{
+fn write_rgba_to_png<S: AsRef<str>>(name: S, width: u32, height: u32, buf: &[u8]) {
     image::save_buffer_with_format(
         get_expected_image_path(name),
         buf,
         width,
         height,
         ColorType::Rgba8,
-        ImageFormat::Png
+        ImageFormat::Png,
     )
     .unwrap();
 }
 
-fn read_png_argb8<S: AsRef<str>>(name: S) -> Option<Vec<u8>>
-{
+fn read_png_argb8<S: AsRef<str>>(name: S) -> Option<Vec<u8>> {
     image::io::Reader::open(get_expected_image_path(name))
         .ok()
         .and_then(|reader| reader.decode().ok())
         .map(|image| image.into_rgba8().into_raw())
 }
 
-fn write_framebuffer_to_png<S: AsRef<str>>(name: S, width: u32, height: u32, data: &[u8])
-{
+fn write_framebuffer_to_png<S: AsRef<str>>(name: S, width: u32, height: u32, data: &[u8]) {
     write_rgba_to_png(name, width, height, data);
 }
 
-fn create_context_and_run<R, F>(
-    event_loop: &EventLoop<()>,
-    width: u32,
-    height: u32,
-    action: F
-) -> R
+fn create_context_and_run<R, F>(event_loop: &EventLoop<()>, width: u32, height: u32, action: F) -> R
 where
-    F: FnOnce(&mut GLRenderer) -> R
+    F: FnOnce(&mut GLRenderer) -> R,
 {
     let context_builder = glutin::ContextBuilder::new()
         .with_gl_debug_flag(true)
@@ -82,9 +72,8 @@ where
     #[cfg(not(target_os = "linux"))]
     let context = context_builder
         .build_windowed(
-            glutin::window::WindowBuilder::new()
-                .with_inner_size(PhysicalSize::new(width, height)),
-            &event_loop
+            glutin::window::WindowBuilder::new().with_inner_size(PhysicalSize::new(width, height)),
+            &event_loop,
         )
         .unwrap();
 
@@ -111,25 +100,21 @@ fn run_test_with_new_context<S: AsRef<str>, F: FnOnce(&mut GLRenderer)>(
     expected_image_name: S,
     width: u32,
     height: u32,
-    action: F
-)
-{
+    action: F,
+) {
     let expected_image = read_png_argb8(expected_image_name.as_ref());
 
     let actual_image = create_context_and_run(event_loop, width, height, |renderer| {
         action(renderer);
 
-        let actual_image =
-            renderer.draw_frame(|graphics| graphics.capture(ImageDataType::RGBA));
+        let actual_image = renderer.draw_frame(|graphics| graphics.capture(ImageDataType::RGBA));
 
-        if expected_image.is_none()
-            || expected_image.as_ref().unwrap() != actual_image.data()
-        {
+        if expected_image.is_none() || expected_image.as_ref().unwrap() != actual_image.data() {
             write_framebuffer_to_png(
                 format!("{}_ACTUAL", expected_image_name.as_ref()),
                 width,
                 height,
-                actual_image.data().as_slice()
+                actual_image.data().as_slice(),
             );
         }
 
@@ -160,16 +145,14 @@ fn run_test_with_new_context<S: AsRef<str>, F: FnOnce(&mut GLRenderer)>(
     );
 }
 
-struct GLTest
-{
+struct GLTest {
     width: u32,
     height: u32,
     name: String,
-    action: Box<dyn FnOnce(&mut GLRenderer)>
+    action: Box<dyn FnOnce(&mut GLRenderer)>,
 }
 
-fn main()
-{
+fn main() {
     simple_logger::SimpleLogger::new().init().unwrap();
 
     let event_loop = EventLoop::new();
@@ -189,18 +172,14 @@ fn main()
                             .create_image_from_file_path(
                                 Some(speedy2d::image::ImageFileFormat::PNG),
                                 speedy2d::image::ImageSmoothingMode::Linear,
-                                "test/assets/expected_images/test_half_circle.png"
+                                "test/assets/expected_images/test_half_circle.png",
                             )
                             .unwrap();
                     }
-                    graphics.draw_circle(
-                        Vec2::new(100.0, 150.0),
-                        50.0,
-                        Color::from_gray(0.0)
-                    );
+                    graphics.draw_circle(Vec2::new(100.0, 150.0), 50.0, Color::from_gray(0.0));
                 });
             }
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -213,7 +192,7 @@ fn main()
             let text = typeface.layout_text(
                 "The quick brown föx jumped over the lazy dog!",
                 14.0,
-                TextOptions::new()
+                TextOptions::new(),
             );
 
             for i in 0..10 {
@@ -222,7 +201,7 @@ fn main()
 
                     graphics.draw_rectangle(
                         Rectangle::from_tuples((10.0, 20.0), (30.0, 40.0)),
-                        Color::MAGENTA
+                        Color::MAGENTA,
                     );
 
                     if i == 0 || i == 9 {
@@ -230,7 +209,7 @@ fn main()
                     }
                 });
             }
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -242,25 +221,25 @@ fn main()
                 graphics.clear_screen(Color::BLACK);
                 graphics.draw_rectangle(
                     Rect::from_tuples((100.0, 100.0), (200.0, 200.0)),
-                    Color::from_hex_argb(0x77FFFFFF)
+                    Color::from_hex_argb(0x77FFFFFF),
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((300.0, 100.0), (400.0, 200.0)),
-                    Color::from_hex_argb(0x77000000)
+                    Color::from_hex_argb(0x77000000),
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((100.0, 300.0), (200.0, 400.0)),
-                    Color::from_hex_argb(0x00FFFFFF)
+                    Color::from_hex_argb(0x00FFFFFF),
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((300.0, 300.0), (400.0, 400.0)),
-                    Color::from_hex_argb(0x00000000)
+                    Color::from_hex_argb(0x00000000),
                 );
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -272,25 +251,25 @@ fn main()
                 graphics.clear_screen(Color::from_hex_argb(0x55888888));
                 graphics.draw_rectangle(
                     Rect::from_tuples((100.0, 100.0), (200.0, 200.0)),
-                    Color::from_hex_argb(0x77FFFFFF)
+                    Color::from_hex_argb(0x77FFFFFF),
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((300.0, 100.0), (400.0, 200.0)),
-                    Color::from_hex_argb(0x77000000)
+                    Color::from_hex_argb(0x77000000),
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((100.0, 300.0), (200.0, 400.0)),
-                    Color::from_hex_argb(0x00FFFFFF)
+                    Color::from_hex_argb(0x00FFFFFF),
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((300.0, 300.0), (400.0, 400.0)),
-                    Color::from_hex_argb(0x00000000)
+                    Color::from_hex_argb(0x00000000),
                 );
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -302,25 +281,25 @@ fn main()
                 graphics.clear_screen(Color::from_hex_argb(0x55888888));
                 graphics.draw_rectangle(
                     Rect::from_tuples((100.0, 100.0), (200.0, 200.0)),
-                    Color::WHITE
+                    Color::WHITE,
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((300.0, 100.0), (400.0, 200.0)),
-                    Color::BLACK
+                    Color::BLACK,
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((100.0, 300.0), (200.0, 400.0)),
-                    Color::BLUE
+                    Color::BLUE,
                 );
 
                 graphics.draw_rectangle(
                     Rect::from_tuples((300.0, 300.0), (400.0, 400.0)),
-                    Color::RED
+                    Color::RED,
                 );
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -333,15 +312,15 @@ fn main()
 
                 graphics.draw_rectangle(
                     Rectangle::from_tuples((10.0, 20.0), (30.0, 40.0)),
-                    Color::MAGENTA
+                    Color::MAGENTA,
                 );
 
                 graphics.draw_rectangle(
                     Rectangle::from_tuples((15.0, 30.0), (49.0, 48.0)),
-                    Color::GREEN
+                    Color::GREEN,
                 );
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -358,7 +337,7 @@ fn main()
 
                 graphics.draw_line((1.0, 20.5), (49.0, 20.5), 5.0, Color::LIGHT_GRAY);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -375,7 +354,7 @@ fn main()
 
                 graphics.draw_line((20.5, 1.0), (20.5, 49.0), 5.0, Color::LIGHT_GRAY);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -390,7 +369,7 @@ fn main()
 
                 graphics.draw_circle((40.0, 40.0), 5.0, Color::BLUE);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -405,17 +384,17 @@ fn main()
                     [
                         Vec2::new(100.0, 100.0),
                         Vec2::new(200.0, 100.0),
-                        Vec2::new(200.0, 200.0)
+                        Vec2::new(200.0, 200.0),
                     ],
                     [Color::MAGENTA, Color::MAGENTA, Color::MAGENTA],
                     [
                         Vec2::new(-1.0, -1.0),
                         Vec2::new(1.0, -1.0),
-                        Vec2::new(1.0, 1.0)
-                    ]
+                        Vec2::new(1.0, 1.0),
+                    ],
                 );
             });
-        })
+        }),
     });
 
     /*
@@ -507,7 +486,7 @@ fn main()
             let text = typeface.layout_text(
                 "The quick brown föx jumped over the lazy dog!",
                 64.0,
-                TextOptions::new()
+                TextOptions::new(),
             );
 
             renderer.draw_frame(|graphics| {
@@ -523,7 +502,7 @@ fn main()
 
                 graphics.draw_text(Vec2::new(0.0, 400.0), Color::WHITE, &text);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -545,7 +524,7 @@ fn main()
             let text = typeface.layout_text(
                 lorem,
                 40.0,
-                TextOptions::new().with_wrap_to_width(300.0, TextAlignment::Left)
+                TextOptions::new().with_wrap_to_width(300.0, TextAlignment::Left),
             );
 
             renderer.draw_frame(|graphics| {
@@ -555,17 +534,17 @@ fn main()
                     (20.0, 20.0),
                     Rect::from_tuples((100.0, 100.0), (150.0, 250.0)),
                     Color::BLUE,
-                    &text
+                    &text,
                 );
 
                 graphics.draw_text_cropped(
                     (20.0, 20.0),
                     Rect::from_tuples((150.0, 100.0), (280.0, 250.0)),
                     Color::RED,
-                    &text
+                    &text,
                 );
             });
-        })
+        }),
     });
 
     /*
@@ -658,7 +637,7 @@ fn main()
                 30.0,
                 TextOptions::new()
                     .with_wrap_to_width(400.0, TextAlignment::Left)
-                    .with_tracking(100.0)
+                    .with_tracking(100.0),
             );
 
             renderer.draw_frame(|graphics| {
@@ -666,7 +645,7 @@ fn main()
 
                 graphics.draw_text((10.0, 10.0), Color::BLACK, &text);
             });
-        })
+        }),
     });
 
     /*
@@ -763,14 +742,14 @@ fn main()
             let text = typeface.layout_text(
                 "The quick brown föx\njumped ov\ner the lazy dog!",
                 32.0,
-                TextOptions::new()
+                TextOptions::new(),
             );
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
                 graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -783,14 +762,14 @@ fn main()
             let text = typeface.layout_text(
                 "\nThe quick brown föx\nj\n\numped ov\ner the lazy dog!",
                 32.0,
-                TextOptions::new()
+                TextOptions::new(),
             );
 
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::WHITE);
                 graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
             });
-        })
+        }),
     });
 
     /*
@@ -866,7 +845,7 @@ fn main()
                 graphics.clear_screen(Color::WHITE);
                 graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -874,8 +853,7 @@ fn main()
         height: 640,
         name: "image_load_from_raw_pixels".to_string(),
         action: Box::new(|renderer| {
-            let image =
-                image::open("test/assets/expected_images/test_half_circle.png").unwrap();
+            let image = image::open("test/assets/expected_images/test_half_circle.png").unwrap();
             let size = image.dimensions();
 
             renderer.draw_frame(|graphics| {
@@ -886,13 +864,13 @@ fn main()
                         ImageDataType::RGBA,
                         ImageSmoothingMode::Linear,
                         Vector2::new(size.0, size.1),
-                        &image.to_rgba8()
+                        &image.to_rgba8(),
                     )
                     .unwrap();
 
                 graphics.draw_image(Vector2::new(200.0, 200.0), &texture);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -900,8 +878,7 @@ fn main()
         height: 640,
         name: "image_load_from_raw_pixels_multiple_times".to_string(),
         action: Box::new(|renderer| {
-            let image =
-                image::open("test/assets/expected_images/test_half_circle.png").unwrap();
+            let image = image::open("test/assets/expected_images/test_half_circle.png").unwrap();
             let size = image.dimensions();
 
             for _ in 0..10 {
@@ -913,14 +890,14 @@ fn main()
                             ImageDataType::RGBA,
                             ImageSmoothingMode::Linear,
                             Vector2::new(size.0, size.1),
-                            &image.to_rgba8()
+                            &image.to_rgba8(),
                         )
                         .unwrap();
 
                     graphics.draw_image(Vector2::new(200.0, 200.0), &texture);
                 });
             }
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -928,8 +905,7 @@ fn main()
         height: 640,
         name: "image_load_from_raw_pixels_no_alpha".to_string(),
         action: Box::new(|renderer| {
-            let image =
-                image::open("test/assets/expected_images/test_half_circle.png").unwrap();
+            let image = image::open("test/assets/expected_images/test_half_circle.png").unwrap();
             let size = image.dimensions();
 
             renderer.draw_frame(|graphics| {
@@ -940,13 +916,13 @@ fn main()
                         ImageDataType::RGB,
                         ImageSmoothingMode::Linear,
                         Vector2::new(size.0, size.1),
-                        &image.to_rgb8()
+                        &image.to_rgb8(),
                     )
                     .unwrap();
 
                 graphics.draw_image(Vector2::new(200.0, 200.0), &texture);
             });
-        })
+        }),
     });
 
     #[cfg(feature = "image-loading")]
@@ -959,7 +935,7 @@ fn main()
                 .create_image_from_file_path(
                     None,
                     ImageSmoothingMode::Linear,
-                    "test/assets/expected_images/test_half_circle.png"
+                    "test/assets/expected_images/test_half_circle.png",
                 )
                 .unwrap();
 
@@ -967,7 +943,7 @@ fn main()
                 graphics.clear_screen(Color::WHITE);
                 graphics.draw_image(Vector2::new(200.0, 200.0), &image);
             });
-        })
+        }),
     });
 
     #[cfg(feature = "image-loading")]
@@ -982,7 +958,7 @@ fn main()
                     ImageSmoothingMode::Linear,
                     std::io::Cursor::new(include_bytes!(
                         "assets/expected_images/test_half_circle.png"
-                    ))
+                    )),
                 )
                 .unwrap();
 
@@ -990,7 +966,7 @@ fn main()
                 graphics.clear_screen(Color::WHITE);
                 graphics.draw_image(Vector2::new(200.0, 200.0), &image);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -998,8 +974,7 @@ fn main()
         height: 640,
         name: "image_load_from_raw_pixels_smiley".to_string(),
         action: Box::new(|renderer| {
-            let image =
-                image::open("test/assets/test_images/smiley_colormap.png").unwrap();
+            let image = image::open("test/assets/test_images/smiley_colormap.png").unwrap();
             let size = image.dimensions();
 
             renderer.draw_frame(|graphics| {
@@ -1010,13 +985,13 @@ fn main()
                         ImageDataType::RGB,
                         ImageSmoothingMode::NearestNeighbor,
                         Vector2::new(size.0, size.1),
-                        &image.to_rgb8()
+                        &image.to_rgb8(),
                     )
                     .unwrap();
 
                 graphics.draw_image(Vector2::new(100.0, 100.0), &texture);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -1028,16 +1003,14 @@ fn main()
                 graphics.clear_screen(Color::LIGHT_GRAY);
 
                 graphics.set_clip(Some(Rectangle::from_tuples((10, 10), (30, 20))));
-                graphics.draw_rectangle(
-                    Rectangle::from_tuples((0.0, 0.0), (20.0, 40.0)),
-                    Color::RED
-                );
+                graphics
+                    .draw_rectangle(Rectangle::from_tuples((0.0, 0.0), (20.0, 40.0)), Color::RED);
                 graphics.draw_rectangle(
                     Rectangle::from_tuples((20.0, 0.0), (40.0, 40.0)),
-                    Color::BLUE
+                    Color::BLUE,
                 );
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -1055,7 +1028,7 @@ fn main()
                 graphics.clear_screen(Color::GREEN);
                 graphics.draw_text(Vector2::new(0.0, 0.0), Color::BLACK, &text);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -1070,11 +1043,11 @@ fn main()
                     (250.0, 50.0),
                     (400.0, 100.0),
                     (300.0, 400.0),
-                    (100.0, 400.0)
+                    (100.0, 400.0),
                 ]);
                 graphics.draw_polygon(&poly, (0.0, 0.0), Color::RED);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -1089,11 +1062,11 @@ fn main()
                     (300.0, 400.0),
                     (400.0, 100.0),
                     (250.0, 50.0),
-                    (100.0, 100.0)
+                    (100.0, 100.0),
                 ]);
                 graphics.draw_polygon(&poly, (0.0, 0.0), Color::RED);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -1108,12 +1081,12 @@ fn main()
                     (300.0, 400.0),
                     (400.0, 100.0),
                     (250.0, 50.0),
-                    (100.0, 100.0)
+                    (100.0, 100.0),
                 ]);
                 graphics.draw_polygon(&poly, (0.0, 0.0), Color::RED);
                 graphics.draw_polygon(&poly, (-10.0, 20.0), Color::BLUE);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -1128,11 +1101,11 @@ fn main()
                     (300.0, 400.0),
                     (400.0, 100.0),
                     (250.0, 50.0),
-                    (250.0, 350.0)
+                    (250.0, 350.0),
                 ]);
                 graphics.draw_polygon(&poly, (0.0, 0.0), Color::RED);
             });
-        })
+        }),
     });
 
     tests.push(GLTest {
@@ -1145,7 +1118,7 @@ fn main()
             let text = typeface.layout_text(
                 "The quick brown föx jumped over the lazy dog!",
                 30.0,
-                TextOptions::default()
+                TextOptions::default(),
             );
 
             renderer.draw_frame(|graphics| {
@@ -1163,25 +1136,19 @@ fn main()
                         capture.format(),
                         ImageSmoothingMode::NearestNeighbor,
                         capture.size(),
-                        capture.data().as_slice()
+                        capture.data().as_slice(),
                     )
                     .unwrap();
 
                 graphics.draw_image((50.0, 25.0), &texture);
             });
-        })
+        }),
     });
 
     for test in tests {
         log::info!("Running test {}", test.name);
 
-        run_test_with_new_context(
-            &event_loop,
-            test.name,
-            test.width,
-            test.height,
-            test.action
-        );
+        run_test_with_new_context(&event_loop, test.name, test.width, test.height, test.action);
     }
 
     log::info!("All tests succeeded");

@@ -26,8 +26,7 @@ use speedy2d::color::Color;
 use speedy2d::font::{Font, FormattedTextBlock, TextLayout, TextOptions};
 use speedy2d::{GLRenderer, Graphics2D};
 
-fn main()
-{
+fn main() {
     let event_loop = EventLoop::new();
 
     let builder = WindowBuilder::new()
@@ -67,8 +66,7 @@ fn main()
     });
 }
 
-fn render_frame(graphics: &mut Graphics2D, text: std::rc::Rc<FormattedTextBlock>)
-{
+fn render_frame(graphics: &mut Graphics2D, text: std::rc::Rc<FormattedTextBlock>) {
     graphics.clear_screen(Color::WHITE);
     graphics.draw_circle((150.0, 120.0), 75.0, Color::from_rgb(0.8, 0.9, 1.0));
     graphics.draw_text((290.0, 90.0), Color::BLACK, &text);
@@ -76,9 +74,8 @@ fn render_frame(graphics: &mut Graphics2D, text: std::rc::Rc<FormattedTextBlock>
 
 fn create_best_context(
     window_builder: &WindowBuilder,
-    event_loop: &EventLoop<()>
-) -> Option<glutin::WindowedContext<glutin::NotCurrent>>
-{
+    event_loop: &EventLoop<()>,
+) -> Option<glutin::WindowedContext<glutin::NotCurrent>> {
     for vsync in &[true, false] {
         for multisampling in &[16, 8, 4, 2, 1, 0] {
             let mut windowed_context = glutin::ContextBuilder::new()
@@ -89,8 +86,7 @@ fn create_best_context(
                 windowed_context = windowed_context.with_multisampling(*multisampling);
             }
 
-            let result =
-                windowed_context.build_windowed(window_builder.clone(), event_loop);
+            let result = windowed_context.build_windowed(window_builder.clone(), event_loop);
             if let Ok(context) = result {
                 return Some(context);
             }

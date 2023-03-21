@@ -26,8 +26,7 @@ use speedy2d::shape::Rect;
 use speedy2d::window::{WindowHandler, WindowHelper};
 use speedy2d::{Graphics2D, Window};
 
-fn main()
-{
+fn main() {
     simple_logger::SimpleLogger::new().init().unwrap();
 
     let window = Window::new_centered("Speedy2D: Moving Text", (800, 800)).unwrap();
@@ -44,25 +43,22 @@ fn main()
     let text = font.layout_text(
         lorem,
         48.0,
-        TextOptions::new().with_wrap_to_width(500.0, TextAlignment::Left)
+        TextOptions::new().with_wrap_to_width(500.0, TextAlignment::Left),
     );
 
     window.run_loop(MyWindowHandler {
         text,
-        start_time: Instant::now()
+        start_time: Instant::now(),
     })
 }
 
-struct MyWindowHandler
-{
+struct MyWindowHandler {
     text: Rc<FormattedTextBlock>,
-    start_time: Instant
+    start_time: Instant,
 }
 
-impl WindowHandler for MyWindowHandler
-{
-    fn on_draw(&mut self, helper: &mut WindowHelper, graphics: &mut Graphics2D)
-    {
+impl WindowHandler for MyWindowHandler {
+    fn on_draw(&mut self, helper: &mut WindowHelper, graphics: &mut Graphics2D) {
         graphics.clear_screen(Color::WHITE);
 
         let elapsed_secs = self.start_time.elapsed().as_secs_f32();
@@ -70,8 +66,7 @@ impl WindowHandler for MyWindowHandler
         let center = Vec2::new(200.0, 200.0);
         let offset = 50.0;
 
-        let position =
-            center + Vec2::new(elapsed_secs.cos() * offset, elapsed_secs.sin() * offset);
+        let position = center + Vec2::new(elapsed_secs.cos() * offset, elapsed_secs.sin() * offset);
 
         let crop_window = Rect::from_tuples((250.0, 250.0), (400.0, 400.0));
 

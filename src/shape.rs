@@ -39,101 +39,86 @@ pub type Rect = Rectangle<f32>;
 /// top left vertex, and the bottom right vertex.
 #[derive(Debug, PartialEq, Eq, Clone)]
 #[repr(C)]
-pub struct Rectangle<T = f32>
-{
+pub struct Rectangle<T = f32> {
     top_left: Vector2<T>,
-    bottom_right: Vector2<T>
+    bottom_right: Vector2<T>,
 }
 
-impl<T> Rectangle<T>
-{
+impl<T> Rectangle<T> {
     /// Constructs a new `Rectangle`. The top left vertex must be above and to
     /// the left of the bottom right vertex.
     #[inline]
-    pub const fn new(top_left: Vector2<T>, bottom_right: Vector2<T>) -> Self
-    {
+    pub const fn new(top_left: Vector2<T>, bottom_right: Vector2<T>) -> Self {
         Rectangle {
             top_left,
-            bottom_right
+            bottom_right,
         }
     }
 
     /// Constructs a new `Rectangle`. The top left vertex must be above and to
     /// the left of the bottom right vertex.
     #[inline]
-    pub fn from_tuples(top_left: (T, T), bottom_right: (T, T)) -> Self
-    {
+    pub fn from_tuples(top_left: (T, T), bottom_right: (T, T)) -> Self {
         Rectangle {
             top_left: Vector2::new(top_left.0, top_left.1),
-            bottom_right: Vector2::new(bottom_right.0, bottom_right.1)
+            bottom_right: Vector2::new(bottom_right.0, bottom_right.1),
         }
     }
 
     /// Returns a reference to the top left vertex.
     #[inline]
-    pub const fn top_left(&self) -> &Vector2<T>
-    {
+    pub const fn top_left(&self) -> &Vector2<T> {
         &self.top_left
     }
 
     /// Returns a reference to the bottom right vertex.
     #[inline]
-    pub const fn bottom_right(&self) -> &Vector2<T>
-    {
+    pub const fn bottom_right(&self) -> &Vector2<T> {
         &self.bottom_right
     }
 }
 
-impl<T: Copy> Rectangle<T>
-{
+impl<T: Copy> Rectangle<T> {
     /// Returns a vector representing the top right vertex.
     #[inline]
-    pub fn top_right(&self) -> Vector2<T>
-    {
+    pub fn top_right(&self) -> Vector2<T> {
         Vector2::new(self.bottom_right.x, self.top_left.y)
     }
 
     /// Returns a vector representing the bottom left vertex.
     #[inline]
-    pub fn bottom_left(&self) -> Vector2<T>
-    {
+    pub fn bottom_left(&self) -> Vector2<T> {
         Vector2::new(self.top_left.x, self.bottom_right.y)
     }
 }
 
-impl<T: std::ops::Sub<Output = T> + Copy> Rectangle<T>
-{
+impl<T: std::ops::Sub<Output = T> + Copy> Rectangle<T> {
     /// Returns the width of the rectangle.
     #[inline]
-    pub fn width(&self) -> T
-    {
+    pub fn width(&self) -> T {
         self.bottom_right.x - self.top_left.x
     }
 
     /// Returns the height of the rectangle.
     #[inline]
-    pub fn height(&self) -> T
-    {
+    pub fn height(&self) -> T {
         self.bottom_right.y - self.top_left.y
     }
 
     /// Returns a `Vector2` containing the width and height of the rectangle.
     #[inline]
-    pub fn size(&self) -> Vector2<T>
-    {
+    pub fn size(&self) -> Vector2<T> {
         Vector2::new(self.width(), self.height())
     }
 }
 
-impl<T: PartialOrd<T> + Copy> Rectangle<T>
-{
+impl<T: PartialOrd<T> + Copy> Rectangle<T> {
     /// Returns true if the specified point is inside this rectangle. This is
     /// inclusive of the top and left coordinates, and exclusive of the bottom
     /// and right coordinates.
     #[inline]
     #[must_use]
-    pub fn contains(&self, point: Vector2<T>) -> bool
-    {
+    pub fn contains(&self, point: Vector2<T>) -> bool {
         point.x >= self.top_left.x
             && point.y >= self.top_left.y
             && point.x < self.bottom_right.x
@@ -141,8 +126,7 @@ impl<T: PartialOrd<T> + Copy> Rectangle<T>
     }
 }
 
-impl<T: PartialOrd + Copy> Rectangle<T>
-{
+impl<T: PartialOrd + Copy> Rectangle<T> {
     /// Finds the intersection of two rectangles -- in other words, the area
     /// that is common to both of them.
     ///
@@ -150,17 +134,16 @@ impl<T: PartialOrd + Copy> Rectangle<T>
     /// function will return `None`.
     #[inline]
     #[must_use]
-    pub fn intersect(&self, other: &Self) -> Option<Self>
-    {
+    pub fn intersect(&self, other: &Self) -> Option<Self> {
         let result = Self {
             top_left: Vector2::new(
                 max(self.top_left.x, other.top_left.x),
-                max(self.top_left.y, other.top_left.y)
+                max(self.top_left.y, other.top_left.y),
             ),
             bottom_right: Vector2::new(
                 min(self.bottom_right.x, other.bottom_right.x),
-                min(self.bottom_right.y, other.bottom_right.y)
-            )
+                min(self.bottom_right.y, other.bottom_right.y),
+            ),
         };
 
         if result.is_positive_area() {
@@ -171,43 +154,37 @@ impl<T: PartialOrd + Copy> Rectangle<T>
     }
 }
 
-impl<T: PrimitiveZero> Rectangle<T>
-{
+impl<T: PrimitiveZero> Rectangle<T> {
     /// A constant representing a rectangle with position (0, 0) and zero area.
     /// Each component is set to zero.
     pub const ZERO: Rectangle<T> = Rectangle::new(Vector2::ZERO, Vector2::ZERO);
 }
 
-impl<T: PartialEq> Rectangle<T>
-{
+impl<T: PartialEq> Rectangle<T> {
     /// Returns `true` if the rectangle has zero area.
     #[inline]
-    pub fn is_zero_area(&self) -> bool
-    {
+    pub fn is_zero_area(&self) -> bool {
         self.top_left.x == self.bottom_right.x || self.top_left.y == self.bottom_right.y
     }
 }
 
-impl<T: PartialOrd> Rectangle<T>
-{
+impl<T: PartialOrd> Rectangle<T> {
     /// Returns `true` if the rectangle has an area greater than zero.
     #[inline]
-    pub fn is_positive_area(&self) -> bool
-    {
+    pub fn is_positive_area(&self) -> bool {
         self.top_left.x < self.bottom_right.x && self.top_left.y < self.bottom_right.y
     }
 }
 
 impl<T: Copy> Rectangle<T>
 where
-    Vector2<T>: std::ops::Add<Output = Vector2<T>>
+    Vector2<T>: std::ops::Add<Output = Vector2<T>>,
 {
     /// Returns a new rectangle, whose vertices are offset relative to the
     /// current rectangle by the specified amount. This is equivalent to
     /// adding the specified vector to each vertex.
     #[inline]
-    pub fn with_offset(&self, offset: impl Into<Vector2<T>>) -> Self
-    {
+    pub fn with_offset(&self, offset: impl Into<Vector2<T>>) -> Self {
         let offset = offset.into();
         Rectangle::new(self.top_left + offset, self.bottom_right + offset)
     }
@@ -215,66 +192,56 @@ where
 
 impl<T: Copy> Rectangle<T>
 where
-    Vector2<T>: std::ops::Sub<Output = Vector2<T>>
+    Vector2<T>: std::ops::Sub<Output = Vector2<T>>,
 {
     /// Returns a new rectangle, whose vertices are negatively offset relative
     /// to the current rectangle by the specified amount. This is equivalent
     /// to subtracting the specified vector to each vertex.
     #[inline]
-    pub fn with_negative_offset(&self, offset: impl Into<Vector2<T>>) -> Self
-    {
+    pub fn with_negative_offset(&self, offset: impl Into<Vector2<T>>) -> Self {
         let offset = offset.into();
         Rectangle::new(self.top_left - offset, self.bottom_right - offset)
     }
 }
 
 #[cfg(feature = "text")]
-impl<T> From<rusttype::Rect<T>> for Rectangle<T>
-{
-    fn from(rect: rusttype::Rect<T>) -> Self
-    {
+impl<T> From<rusttype::Rect<T>> for Rectangle<T> {
+    fn from(rect: rusttype::Rect<T>) -> Self {
         Rectangle::new(Vector2::from(rect.min), Vector2::from(rect.max))
     }
 }
 
-impl<T: num_traits::AsPrimitive<f32>> Rectangle<T>
-{
+impl<T: num_traits::AsPrimitive<f32>> Rectangle<T> {
     /// Returns a new rectangle where the coordinates have been cast to `f32`
     /// values, using the `as` operator.
     #[inline]
     #[must_use]
-    pub fn into_f32(self) -> Rectangle<f32>
-    {
+    pub fn into_f32(self) -> Rectangle<f32> {
         Rectangle::new(self.top_left.into_f32(), self.bottom_right.into_f32())
     }
 }
 
-impl<T: num_traits::AsPrimitive<f32> + Copy> Rectangle<T>
-{
+impl<T: num_traits::AsPrimitive<f32> + Copy> Rectangle<T> {
     /// Returns a new rectangle where the coordinates have been cast to `f32`
     /// values, using the `as` operator.
     #[inline]
     #[must_use]
-    pub fn as_f32(&self) -> Rectangle<f32>
-    {
+    pub fn as_f32(&self) -> Rectangle<f32> {
         Rectangle::new(self.top_left.into_f32(), self.bottom_right.into_f32())
     }
 }
 
 /// A struct representing a polygon.
 #[derive(Debug, Clone)]
-pub struct Polygon
-{
-    pub(crate) triangles: Vec<[Vec2; 3]>
+pub struct Polygon {
+    pub(crate) triangles: Vec<[Vec2; 3]>,
 }
 
-impl Polygon
-{
+impl Polygon {
     /// Generate a new polygon given points that describe it's outline.
     ///
     /// The points must be in either clockwise or couter-clockwise order.
-    pub fn new<Point: Into<Vec2> + Copy>(vertices: &[Point]) -> Self
-    {
+    pub fn new<Point: Into<Vec2> + Copy>(vertices: &[Point]) -> Self {
         // We have to flatten the vertices in order for
         // [earcutr](https://github.com/frewsxcv/earcutr/) to accept it.
         // In the future, we can add a triangulation algorithm directly into Speed2D if
@@ -295,7 +262,7 @@ impl Polygon
             triangles.push([
                 vertices[triangulation.pop().unwrap()].into(),
                 vertices[triangulation.pop().unwrap()].into(),
-                vertices[triangulation.pop().unwrap()].into()
+                vertices[triangulation.pop().unwrap()].into(),
             ])
         }
 
@@ -304,13 +271,11 @@ impl Polygon
 }
 
 #[cfg(test)]
-mod test
-{
+mod test {
     use crate::shape::URect;
 
     #[test]
-    pub fn test_intersect_1()
-    {
+    pub fn test_intersect_1() {
         let r1 = URect::from_tuples((100, 100), (200, 200));
         let r2 = URect::from_tuples((100, 300), (200, 400));
         let r3 = URect::from_tuples((125, 50), (175, 500));
@@ -333,8 +298,7 @@ mod test
     }
 
     #[test]
-    pub fn test_intersect_2()
-    {
+    pub fn test_intersect_2() {
         let r1 = URect::from_tuples((100, 100), (200, 200));
         let r2 = URect::from_tuples((100, 200), (200, 300));
 

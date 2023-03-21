@@ -22,15 +22,8 @@ use speedy2d::dimen::{Vec2, Vector2};
 use speedy2d::font::Font;
 use speedy2d::time::Stopwatch;
 use speedy2d::window::{
-    KeyScancode,
-    ModifiersState,
-    MouseButton,
-    MouseScrollDistance,
-    VirtualKeyCode,
-    WindowFullscreenMode,
-    WindowHandler,
-    WindowHelper,
-    WindowStartupInfo
+    KeyScancode, ModifiersState, MouseButton, MouseScrollDistance, VirtualKeyCode,
+    WindowFullscreenMode, WindowHandler, WindowHelper, WindowStartupInfo,
 };
 use speedy2d::{Graphics2D, WebCanvas};
 
@@ -40,25 +33,21 @@ compile_error!("This sample only builds for WebAssembly (wasm32)");
 mod buttons;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
-enum UserEvent
-{
+enum UserEvent {
     ButtonClickGrabMouse,
     ButtonClickEnableFullscreen,
-    ButtonClickTerminate
+    ButtonClickTerminate,
 }
 
-struct MyHandler
-{
+struct MyHandler {
     font: Font,
     timer: Stopwatch,
     buttons: ButtonGroup<UserEvent>,
-    scale: f32
+    scale: f32,
 }
 
-impl WindowHandler<UserEvent> for MyHandler
-{
-    fn on_start(&mut self, helper: &mut WindowHelper<UserEvent>, info: WindowStartupInfo)
-    {
+impl WindowHandler<UserEvent> for MyHandler {
+    fn on_start(&mut self, helper: &mut WindowHelper<UserEvent>, info: WindowStartupInfo) {
         helper.set_title("Speedy2D WebGL Sample");
 
         self.scale = info.scale_factor() as f32;
@@ -68,68 +57,59 @@ impl WindowHandler<UserEvent> for MyHandler
         self.buttons.add(Button::new(
             "Grab mouse cursor",
             self.font.clone(),
-            TriggerableEvent::new(&event_sender, UserEvent::ButtonClickGrabMouse)
+            TriggerableEvent::new(&event_sender, UserEvent::ButtonClickGrabMouse),
         ));
 
         self.buttons.add(Button::new(
             "Enable fullscreen",
             self.font.clone(),
-            TriggerableEvent::new(&event_sender, UserEvent::ButtonClickEnableFullscreen)
+            TriggerableEvent::new(&event_sender, UserEvent::ButtonClickEnableFullscreen),
         ));
 
         self.buttons.add(Button::new(
             "Terminate",
             self.font.clone(),
-            TriggerableEvent::new(&event_sender, UserEvent::ButtonClickTerminate)
+            TriggerableEvent::new(&event_sender, UserEvent::ButtonClickTerminate),
         ));
     }
 
-    fn on_user_event(
-        &mut self,
-        helper: &mut WindowHelper<UserEvent>,
-        user_event: UserEvent
-    )
-    {
+    fn on_user_event(&mut self, helper: &mut WindowHelper<UserEvent>, user_event: UserEvent) {
         log::info!("Got user event: {:?}", user_event);
         match user_event {
             UserEvent::ButtonClickGrabMouse => helper.set_cursor_grab(true).unwrap(),
             UserEvent::ButtonClickEnableFullscreen => {
                 helper.set_fullscreen_mode(WindowFullscreenMode::FullscreenBorderless)
             }
-            UserEvent::ButtonClickTerminate => helper.terminate_loop()
+            UserEvent::ButtonClickTerminate => helper.terminate_loop(),
         }
     }
 
     fn on_mouse_grab_status_changed(
         &mut self,
         _helper: &mut WindowHelper<UserEvent>,
-        mouse_grabbed: bool
-    )
-    {
+        mouse_grabbed: bool,
+    ) {
         log::info!("Mouse grab status changed: {}", mouse_grabbed)
     }
 
     fn on_fullscreen_status_changed(
         &mut self,
         _helper: &mut WindowHelper<UserEvent>,
-        fullscreen: bool
-    )
-    {
+        fullscreen: bool,
+    ) {
         log::info!("Fullscreen status changed callback: {}", fullscreen)
     }
 
     fn on_scale_factor_changed(
         &mut self,
         _helper: &mut WindowHelper<UserEvent>,
-        scale_factor: f64
-    )
-    {
+        scale_factor: f64,
+    ) {
         log::info!("Scale factor is now {}", scale_factor);
         self.scale = scale_factor as f32;
     }
 
-    fn on_draw(&mut self, helper: &mut WindowHelper<UserEvent>, graphics: &mut Graphics2D)
-    {
+    fn on_draw(&mut self, helper: &mut WindowHelper<UserEvent>, graphics: &mut Graphics2D) {
         graphics.clear_screen(Color::from_rgb(0.9, 0.95, 1.0));
 
         self.buttons
@@ -141,44 +121,30 @@ impl WindowHandler<UserEvent> for MyHandler
         let offset = 200.0;
 
         let position = center
-            + Vector2::<f64>::new(
-                elapsed_secs.cos() * offset,
-                elapsed_secs.sin() * offset
-            )
-            .into_f32();
+            + Vector2::<f64>::new(elapsed_secs.cos() * offset, elapsed_secs.sin() * offset)
+                .into_f32();
 
         graphics.draw_circle(
             position * self.scale,
             75.0 * self.scale,
-            Color::from_rgb(0.6, 0.8, 1.0)
+            Color::from_rgb(0.6, 0.8, 1.0),
         );
 
         // Request that we draw another frame once this one has finished
         helper.request_redraw();
     }
 
-    fn on_mouse_move(&mut self, _helper: &mut WindowHelper<UserEvent>, position: Vec2)
-    {
+    fn on_mouse_move(&mut self, _helper: &mut WindowHelper<UserEvent>, position: Vec2) {
         self.buttons.on_mouse_move(position);
     }
 
-    fn on_mouse_button_down(
-        &mut self,
-        _helper: &mut WindowHelper<UserEvent>,
-        button: MouseButton
-    )
-    {
+    fn on_mouse_button_down(&mut self, _helper: &mut WindowHelper<UserEvent>, button: MouseButton) {
         if button == MouseButton::Left {
             self.buttons.on_mouse_left_down();
         }
     }
 
-    fn on_mouse_button_up(
-        &mut self,
-        _helper: &mut WindowHelper<UserEvent>,
-        button: MouseButton
-    )
-    {
+    fn on_mouse_button_up(&mut self, _helper: &mut WindowHelper<UserEvent>, button: MouseButton) {
         if button == MouseButton::Left {
             self.buttons.on_mouse_left_up();
         }
@@ -187,9 +153,8 @@ impl WindowHandler<UserEvent> for MyHandler
     fn on_mouse_wheel_scroll(
         &mut self,
         _helper: &mut WindowHelper<UserEvent>,
-        distance: MouseScrollDistance
-    )
-    {
+        distance: MouseScrollDistance,
+    ) {
         log::info!("on_mouse_wheel_scroll: {:?}", distance)
     }
 
@@ -197,9 +162,8 @@ impl WindowHandler<UserEvent> for MyHandler
         &mut self,
         _helper: &mut WindowHelper<UserEvent>,
         virtual_key_code: Option<VirtualKeyCode>,
-        scancode: KeyScancode
-    )
-    {
+        scancode: KeyScancode,
+    ) {
         log::info!(
             "on_key_down: key='{:?}' code='{}'",
             virtual_key_code,
@@ -211,9 +175,8 @@ impl WindowHandler<UserEvent> for MyHandler
         &mut self,
         _helper: &mut WindowHelper<UserEvent>,
         virtual_key_code: Option<VirtualKeyCode>,
-        scancode: KeyScancode
-    )
-    {
+        scancode: KeyScancode,
+    ) {
         log::info!(
             "on_key_up: key='{:?}' code='{}'",
             virtual_key_code,
@@ -221,34 +184,26 @@ impl WindowHandler<UserEvent> for MyHandler
         );
     }
 
-    fn on_keyboard_char(
-        &mut self,
-        _helper: &mut WindowHelper<UserEvent>,
-        unicode_codepoint: char
-    )
-    {
+    fn on_keyboard_char(&mut self, _helper: &mut WindowHelper<UserEvent>, unicode_codepoint: char) {
         log::info!("on_keyboard_char: '{}'", unicode_codepoint);
     }
 
     fn on_keyboard_modifiers_changed(
         &mut self,
         _helper: &mut WindowHelper<UserEvent>,
-        state: ModifiersState
-    )
-    {
+        state: ModifiersState,
+    ) {
         log::info!("on_keyboard_modifiers_changed: {:?}", state);
     }
 }
 
-fn main()
-{
+fn main() {
     wasm_logger::init(wasm_logger::Config::default());
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
 
     log::info!("Speedy2D WebGL sample");
 
-    let font =
-        Font::new(include_bytes!("../../../assets/fonts/NotoSans-Regular.ttf")).unwrap();
+    let font = Font::new(include_bytes!("../../../assets/fonts/NotoSans-Regular.ttf")).unwrap();
 
     WebCanvas::new_for_id_with_user_events(
         "my_canvas",
@@ -256,8 +211,8 @@ fn main()
             font,
             timer: Stopwatch::new().unwrap(),
             buttons: ButtonGroup::new(),
-            scale: 1.0
-        }
+            scale: 1.0,
+        },
     )
     .unwrap();
 }
