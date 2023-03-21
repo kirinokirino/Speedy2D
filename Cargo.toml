@@ -16,8 +16,10 @@ repository = "https://github.com/QuantumBadger/Speedy2D"
 documentation = "https://docs.rs/speedy2d"
 
 [features]
-default = ["windowing", "windowing-x11", "image-loading", "backtrace", "text"]
+default = ["windowing", "windowing-x11"]
 image-loading = ["image"]
+image-png = ["image/png"]
+image-jpeg = ["image/jpeg"]
 windowing = ["glutin"]
 windowing-x11 = ["glutin/x11"]
 windowing-wayland = ["glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
@@ -42,7 +44,7 @@ unicode-normalization = { version = "0.1", optional = true }
 glam_rusttype = { version = "0.1.0", path = "../../glam_rusttype", optional = true }
 
 # For image_loading feature
-image = { version = "0.23", optional = true }
+image = { version = "0.23", default-features = false, optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # For windowing feature
