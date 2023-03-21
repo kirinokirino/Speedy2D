@@ -475,7 +475,7 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
     scale: f32,
     options: TextOptions,
 ) -> Rc<FormattedTextBlock> {
-    let scale = Scale::uniform(scale);
+    let scale = Scale::splat(scale);
 
     let mut iterator = WordsIterator::from(Word::split_words(codepoints));
 
@@ -654,7 +654,7 @@ impl TextLayout for FontFamily {
                 line_gap: 0.0,
             },
             Some(font) => {
-                let metrics = font.data.font.v_metrics(Scale::uniform(scale));
+                let metrics = font.data.font.v_metrics(Scale::splat(scale));
                 LineVerticalMetrics {
                     ascent: metrics.ascent,
                     descent: metrics.descent,
@@ -680,7 +680,7 @@ impl TextLayout for Font {
     }
 
     fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics {
-        let metrics = self.data.font.v_metrics(Scale::uniform(scale));
+        let metrics = self.data.font.v_metrics(Scale::splat(scale));
         LineVerticalMetrics {
             ascent: metrics.ascent,
             descent: metrics.descent,

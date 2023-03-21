@@ -7,7 +7,7 @@ use glam::{vec2, Vec2};
 use glam_rect::Rect;
 
 use core::fmt;
-pub use owned_ttf_parser::OutlineBuilder;
+pub use owned_ttf_parser::{GlyphId, OutlineBuilder};
 
 /// Linear interpolation between points.
 #[inline]
@@ -15,19 +15,13 @@ pub(crate) fn lerp(t: f32, p0: Vec2, p1: Vec2) -> Vec2 {
     vec2(p0.x + t * (p1.x - p0.x), p0.y + t * (p1.y - p0.y))
 }
 
-#[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
-pub struct GlyphId(pub u16);
-
-impl From<owned_ttf_parser::GlyphId> for GlyphId {
-    fn from(id: owned_ttf_parser::GlyphId) -> Self {
-        Self(id.0)
-    }
-}
-impl From<GlyphId> for owned_ttf_parser::GlyphId {
-    fn from(id: GlyphId) -> Self {
-        Self(id.0)
-    }
-}
+/// Defines the size of a rendered face of a font, in pixels, horizontally and
+/// vertically. A vertical scale of `y` pixels means that the distance between
+/// the ascent and descent lines (see `VMetrics`) of the face will be `y`
+/// pixels. If `x` and `y` are equal the scaling is uniform. Non-uniform scaling
+/// by a factor *f* in the horizontal direction is achieved by setting `x` equal
+/// to *f* times `y`.
+pub type Scale = Vec2;
 
 /// A single glyph of a font.
 ///
@@ -356,7 +350,9 @@ impl<'font> PositionedGlyph<'font> {
     /// Resets positioning information and recalculates the pixel bounding box
     pub fn set_position(&mut self, p: Vec2) {
         let p_diff = p - self.position;
-        if p_diff.x.fract().is_near_zero() && p_diff.y.fract().is_near_zero() {
+        if p_diff.x.fract().abs() <= core::f32::EPSILON
+            && p_diff.y.fract().abs() <= core::f32::EPSILON
+        {
             if let Some(bb) = self.bb.as_mut() {
                 let rounded_diff = vec2(p_diff.x.round(), p_diff.y.round());
                 bb.top_left += rounded_diff;
@@ -379,27 +375,6 @@ impl fmt::Debug for PositionedGlyph<'_> {
     }
 }
 
-/// Defines the size of a rendered face of a font, in pixels, horizontally and
-/// vertically. A vertical scale of `y` pixels means that the distance between
-/// the ascent and descent lines (see `VMetrics`) of the face will be `y`
-/// pixels. If `x` and `y` are equal the scaling is uniform. Non-uniform scaling
-/// by a factor *f* in the horizontal direction is achieved by setting `x` equal
-/// to *f* times `y`.
-#[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
-pub struct Scale {
-    /// Horizontal scale, in pixels.
-    pub x: f32,
-    /// Vertical scale, in pixels.
-    pub y: f32,
-}
-
-impl Scale {
-    /// Uniform scaling, equivalent to `Scale { x: s, y: s }`.
-    #[inline]
-    pub fn uniform(s: f32) -> Scale {
-        Scale { x: s, y: s }
-    }
-}
 /// A trait for types that can be converted into a `GlyphId`, in the context of
 /// a specific font.
 ///
@@ -420,10 +395,10 @@ impl IntoGlyphId for char {
             .into()
     }
 }
-impl<G: Into<GlyphId>> IntoGlyphId for G {
+impl IntoGlyphId for GlyphId {
     #[inline]
     fn into_glyph_id(self, _font: &RusttypeFont<'_>) -> GlyphId {
-        self.into()
+        self
     }
 }
 
@@ -474,142 +449,3 @@ impl<'a, 'font, 's> Iterator for LayoutIter<'a, 'font, 's> {
         })
     }
 }
-
-pub(crate) trait NearZero {
-    /// Returns if this number is kinda pretty much zero.
-    fn is_near_zero(&self) -> bool;
-}
-impl NearZero for f32 {
-    #[inline]
-    fn is_near_zero(&self) -> bool {
-        self.abs() <= core::f32::EPSILON
-    }
-}
-
-/*
-use font::Font;
-use rusttype::Scale;
-use simple_pixels::{
-    rgb::{RGB8, RGBA8},
-    start, Config, Context, KeyCode, State,
-};
-fn main() {
-    let (width, height) = (400, 400);
-    let config = Config {
-        window_title: "FLOATING".to_string(),
-        window_width: width,
-        window_height: height,
-        fullscreen: false,
-        icon: None,
-    };
-
-    let game = Game::new(width, height);
-    start(config, game);
-}
-
-struct Game {
-    mouse_pos: Vec2,
-    width: u32,
-    height: u32,
-    fonts: Vec<Font<'static>>,
-}
-
-impl Game {
-    pub fn new(width: u32, height: u32) -> Self {
-        let mouse_pos = Vec2::new(0.0, 0.0);
-
-        let center = Vec2::new((width / 2) as f32, (height / 2) as f32);
-
-        // Load the font
-        let mut fonts: Vec<Font<'static>> = Vec::new();
-
-        fonts.push(
-            Font::try_from_bytes(include_bytes!("../fonts/NotoSansCJK-Regular.ttc") as &[u8])
-                .unwrap(),
-        );
-        fonts.push(
-            Font::try_from_bytes(include_bytes!("../fonts/VictorMono-Italic.ttf") as &[u8])
-                .unwrap(),
-        );
-        fonts.push(
-            Font::try_from_bytes(include_bytes!("../fonts/VictorMono-Regular.ttf") as &[u8])
-                .unwrap(),
-        );
-
-        Self {
-            mouse_pos,
-            width,
-            height,
-            fonts,
-        }
-    }
-}
-
-impl State for Game {
-    fn update(&mut self, ctx: &mut Context) {
-        if ctx.is_key_down(KeyCode::Escape) {
-            ctx.quit();
-        }
-
-        let mouse = ctx.get_mouse_pos();
-    }
-
-    fn draw(&mut self, ctx: &mut Context) {
-        ctx.clear();
-        let center = Vec2::new((self.width / 2) as f32, (self.height / 2) as f32);
-
-        // The font size to use
-        let scale = Scale::uniform(32.0);
-
-        // The text to render
-        let text = "This is RustType!おはよう日本語";
-
-        let v_metrics = self.fonts[0].v_metrics(scale);
-
-        // layout the glyphs in a line with 20 pixels padding
-        let glyphs: Vec<_> = self.fonts[0]
-            .layout(text, scale, vec2(20.0, 20.0 + v_metrics.ascent))
-            .collect();
-
-        // work out the layout size
-        let glyphs_height = (v_metrics.ascent - v_metrics.descent).ceil() as u32;
-        let glyphs_width = {
-            let min_x = glyphs
-                .first()
-                .map(|g| g.pixel_bounding_box().unwrap().min.x)
-                .unwrap();
-            let max_x = glyphs
-                .last()
-                .map(|g| g.pixel_bounding_box().unwrap().max.x)
-                .unwrap();
-            (max_x - min_x) as u32
-        };
-
-        // Loop through the glyphs in the text, positing each one on a line
-        for glyph in glyphs {
-            if let Some(bounding_box) = glyph.pixel_bounding_box() {
-                // Draw the glyph into the image per-pixel by using the draw closure
-                glyph.draw(|x, y, alpha| {
-                    ctx.draw_pixel(
-                        // Offset the position by the glyph bounding box
-                        x + bounding_box.min.x as u32,
-                        y + bounding_box.min.y as u32,
-                        // Turn the coverage into an alpha value
-                        color_lerp(RGB8::new(150, 60, 255), RGB8::new(0, 0, 0), alpha),
-                    )
-                });
-            }
-        }
-    }
-}
-
-pub fn color_lerp(a: RGB8, b: RGB8, t: f32) -> RGBA8 {
-    RGBA8::new(
-        (a.r as f32 * t + b.r as f32 * (1.0 - t)) as u8,
-        (a.g as f32 * t + b.g as f32 * (1.0 - t)) as u8,
-        (a.b as f32 * t + b.b as f32 * (1.0 - t)) as u8,
-        0, //(t * 255.0) as u8,
-    )
-}
-
-*/

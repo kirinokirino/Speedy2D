@@ -264,7 +264,7 @@ impl GlyphCache {
                     .unpositioned()
                     .unscaled()
                     .clone()
-                    .scaled(Scale::uniform(key.scale.to_pixels()))
+                    .scaled(Scale::splat(key.scale.to_pixels()))
                     .positioned(vec2(
                         key.subpixel_offset.0.to_pixels(),
                         key.subpixel_offset.1.to_pixels(),

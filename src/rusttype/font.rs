@@ -161,7 +161,7 @@ impl<'font> RusttypeFont<'font> {
     /// # use speedy2d::rusttype::*;
     /// # use speedy2d::rusttype::font::RusttypeFont as Font;
     /// # use glam::Vec2;
-    /// # let (scale, start) = (Scale::uniform(0.0), Vec2::new(0.0, 0.0));
+    /// # let (scale, start) = (Scale::new(0.0, 0.0), Vec2::new(0.0, 0.0));
     /// # let font: Font = unimplemented!();
     /// font.layout("Hello World!", scale, start)
     /// # ;
@@ -173,7 +173,7 @@ impl<'font> RusttypeFont<'font> {
     /// # use speedy2d::rusttype::*;
     /// # use speedy2d::rusttype::font::RusttypeFont as Font;
     /// # use glam::Vec2;
-    /// # let (scale, start) = (Scale::uniform(0.0), Vec2::new(0.0, 0.0));
+    /// # let (scale, start) = (Scale::new(0.0, 0.0), Vec2::new(0.0, 0.0));
     /// # let font: Font = unimplemented!();
     /// font.glyphs_for("Hello World!".chars())
     ///     .scan((None, 0.0), |(last, x), g| {
