@@ -14,9 +14,9 @@ use crate::rusttype::{Glyph, GlyphIter, IntoGlyphId, LayoutIter, Scale, VMetrics
 /// # Example
 ///
 /// ```
-/// # use rusttype::Font;
+/// # use speedy2d::rusttype::font::RusttypeFont as Font;
 /// # fn example() -> Option<()> {
-/// let font_data: &[u8] = include_bytes!("../dev/fonts/dejavu/DejaVuSansMono.ttf");
+/// let font_data: &[u8] = include_bytes!("../../assets/fonts/DejaVuSansMono.ttf");
 /// let font: Font<'static> = Font::try_from_bytes(font_data)?;
 ///
 /// let owned_font_data: Vec<u8> = font_data.to_vec();
@@ -158,8 +158,10 @@ impl<'font> RusttypeFont<'font> {
     /// involving `glyphs_for`, e.g.
     ///
     /// ```no_run
-    /// # use rusttype::*;
-    /// # let (scale, start) = (Scale::uniform(0.0), point(0.0, 0.0));
+    /// # use speedy2d::rusttype::*;
+    /// # use speedy2d::rusttype::font::RusttypeFont as Font;
+    /// # use glam::Vec2;
+    /// # let (scale, start) = (Scale::uniform(0.0), Vec2::new(0.0, 0.0));
     /// # let font: Font = unimplemented!();
     /// font.layout("Hello World!", scale, start)
     /// # ;
@@ -168,8 +170,10 @@ impl<'font> RusttypeFont<'font> {
     /// produces an iterator with behaviour equivalent to the following:
     ///
     /// ```no_run
-    /// # use rusttype::*;
-    /// # let (scale, start) = (Scale::uniform(0.0), point(0.0, 0.0));
+    /// # use speedy2d::rusttype::*;
+    /// # use speedy2d::rusttype::font::RusttypeFont as Font;
+    /// # use glam::Vec2;
+    /// # let (scale, start) = (Scale::uniform(0.0), Vec2::new(0.0, 0.0));
     /// # let font: Font = unimplemented!();
     /// font.glyphs_for("Hello World!".chars())
     ///     .scan((None, 0.0), |(last, x), g| {
@@ -178,7 +182,7 @@ impl<'font> RusttypeFont<'font> {
     ///             *x += font.pair_kerning(scale, *last, g.id());
     ///         }
     ///         let w = g.h_metrics().advance_width;
-    ///         let next = g.positioned(start + vector(*x, 0.0));
+    ///         let next = g.positioned(start + Vec2::new(*x, 0.0));
     ///         *last = Some(next.id());
     ///         *x += w;
     ///         Some(next)

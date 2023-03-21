@@ -35,7 +35,7 @@ use crate::glwrapper::*;
 use crate::image::RawBitmapData;
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode};
 use crate::shape::{IRect, Polygon, Rect};
-use glam::{IVec2, UVec2, Vec2};
+use glam::{UVec2, Vec2};
 
 struct AttributeBuffers {
     position: Vec<f32>,

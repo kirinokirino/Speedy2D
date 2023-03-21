@@ -1080,7 +1080,7 @@ impl Graphics2D {
     ///
     /// ```rust,no_run
     /// # use speedy2d::GLRenderer;
-    /// # use speedy2d::dimen::Vec2;
+    /// # use glam::Vec2;
     /// # use speedy2d::color::Color;
     /// # let mut renderer = unsafe {GLRenderer::new_for_current_context((0,0))}.unwrap();
     /// # renderer.draw_frame(|graphics| {

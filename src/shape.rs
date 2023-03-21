@@ -43,6 +43,16 @@ impl Rect {
         [self.top_left, top_right, self.bottom_right, bottom_left]
     }
 
+    #[inline]
+    pub const fn top_right(&self) -> Vec2 {
+        Vec2::new(self.bottom_right.x, self.top_left.y)
+    }
+
+    #[inline]
+    pub const fn bottom_left(&self) -> Vec2 {
+        Vec2::new(self.top_left.x, self.bottom_right.y)
+    }
+
     /// Constructs a new `Rect`. The top left vertex must be above and to
     /// the left of the bottom right vertex.
     #[inline]
@@ -155,6 +165,23 @@ impl URect {
         }
     }
 
+    #[inline]
+    pub const fn corners(self) -> [UVec2; 4] {
+        let top_right = UVec2::new(self.bottom_right.x, self.top_left.y);
+        let bottom_left = UVec2::new(self.top_left.x, self.bottom_right.y);
+        [self.top_left, top_right, self.bottom_right, bottom_left]
+    }
+
+    #[inline]
+    pub const fn top_right(&self) -> UVec2 {
+        UVec2::new(self.bottom_right.x, self.top_left.y)
+    }
+
+    #[inline]
+    pub const fn bottom_left(&self) -> UVec2 {
+        UVec2::new(self.top_left.x, self.bottom_right.y)
+    }
+
     /// Constructs a new `Rect`. The top left vertex must be above and to
     /// the left of the bottom right vertex.
     #[inline]
@@ -265,6 +292,23 @@ impl IRect {
             top_left,
             bottom_right,
         }
+    }
+
+    #[inline]
+    pub const fn corners(self) -> [IVec2; 4] {
+        let top_right = IVec2::new(self.bottom_right.x, self.top_left.y);
+        let bottom_left = IVec2::new(self.top_left.x, self.bottom_right.y);
+        [self.top_left, top_right, self.bottom_right, bottom_left]
+    }
+
+    #[inline]
+    pub const fn top_right(&self) -> IVec2 {
+        IVec2::new(self.bottom_right.x, self.top_left.y)
+    }
+
+    #[inline]
+    pub const fn bottom_left(&self) -> IVec2 {
+        IVec2::new(self.top_left.x, self.bottom_right.y)
     }
 
     /// Constructs a new `Rect`. The top left vertex must be above and to

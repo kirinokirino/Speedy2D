@@ -34,7 +34,7 @@ impl Rasterizer {
     /// Allocates a new rasterizer that can draw onto a `width` x `height` alpha grid.
     ///
     /// ```
-    /// use ab_glyph_rasterizer::Rasterizer;
+    /// use speedy2d::rusttype::rasterizer::Rasterizer;
     /// let mut rasterizer = Rasterizer::new(14, 38);
     /// ```
     pub fn new(width: usize, height: usize) -> Self {
@@ -51,7 +51,7 @@ impl Rasterizer {
     /// pixels of the grid does not increase.
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::Rasterizer;
+    /// # use speedy2d::rusttype::rasterizer::Rasterizer;
     /// # let mut rasterizer = Rasterizer::new(14, 38);
     /// rasterizer.reset(12, 24);
     /// assert_eq!(rasterizer.dimensions(), (12, 24));
@@ -67,7 +67,7 @@ impl Rasterizer {
     /// dimensions, but does not perform an allocation.
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::Rasterizer;
+    /// # use speedy2d::rusttype::rasterizer::Rasterizer;
     /// # let mut rasterizer = Rasterizer::new(14, 38);
     /// rasterizer.clear();
     /// ```
@@ -80,7 +80,7 @@ impl Rasterizer {
     /// Returns the dimensions the rasterizer was built to draw to.
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::*;
+    /// # use speedy2d::rusttype::rasterizer::*;
     /// let rasterizer = Rasterizer::new(9, 8);
     /// assert_eq!((9, 8), rasterizer.dimensions());
     /// ```
@@ -91,9 +91,10 @@ impl Rasterizer {
     /// Adds a straight line from `p0` to `p1` to the outline.
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::*;
+    /// # use speedy2d::rusttype::rasterizer::*;
+    /// # use glam::vec2;
     /// # let mut rasterizer = Rasterizer::new(9, 8);
-    /// rasterizer.draw_line(point(0.0, 0.48), point(1.22, 0.48));
+    /// rasterizer.draw_line(vec2(0.0, 0.48), vec2(1.22, 0.48));
     /// ```
     pub fn draw_line(&mut self, p0: Vec2, p1: Vec2) {
         unsafe { (self.draw_line_fn)(self, p0, p1) }
@@ -164,9 +165,10 @@ impl Rasterizer {
     /// Adds a quadratic Bézier curve from `p0` to `p2` to the outline using `p1` as the control.
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::*;
+    /// # use speedy2d::rusttype::rasterizer::*;
+    /// # use glam::vec2;
     /// # let mut rasterizer = Rasterizer::new(14, 38);
-    /// rasterizer.draw_quad(point(6.2, 34.5), point(7.2, 34.5), point(9.2, 34.0));
+    /// rasterizer.draw_quad(vec2(6.2, 34.5), vec2(7.2, 34.5), vec2(9.2, 34.0));
     /// ```
     pub fn draw_quad(&mut self, p0: Vec2, p1: Vec2, p2: Vec2) {
         let devx = p0.x - 2.0 * p1.x + p2.x;
@@ -194,13 +196,14 @@ impl Rasterizer {
     /// at the beginning of the curve and `p2` at the end of the curve.
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::*;
+    /// # use speedy2d::rusttype::rasterizer::*;
+    /// # use glam::vec2;
     /// # let mut rasterizer = Rasterizer::new(12, 20);
     /// rasterizer.draw_cubic(
-    ///     point(10.3, 16.4),
-    ///     point(8.6, 16.9),
-    ///     point(7.7, 16.5),
-    ///     point(8.2, 15.2),
+    ///     vec2(10.3, 16.4),
+    ///     vec2(8.6, 16.9),
+    ///     vec2(7.7, 16.5),
+    ///     vec2(8.2, 15.2),
     /// );
     /// ```
     pub fn draw_cubic(&mut self, p0: Vec2, p1: Vec2, p2: Vec2, p3: Vec2) {
@@ -241,7 +244,7 @@ impl Rasterizer {
     /// whereas a value of `1.0` (or greater) means the pixel is totally covered.
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::*;
+    /// # use speedy2d::rusttype::rasterizer::*;
     /// # let (width, height) = (1, 1);
     /// # let mut rasterizer = Rasterizer::new(width, height);
     /// let mut pixels = vec![0u8; width * height];
@@ -265,7 +268,7 @@ impl Rasterizer {
     /// Convenience wrapper for [`Rasterizer::for_each_pixel`].
     ///
     /// ```
-    /// # use ab_glyph_rasterizer::*;
+    /// # use speedy2d::rusttype::rasterizer::*;
     /// # let mut rasterizer = Rasterizer::new(1, 1);
     /// # struct Img;
     /// # impl Img { fn set_pixel(&self, x: u32, y: u32, a: u8) {} }
@@ -281,7 +284,8 @@ impl Rasterizer {
 }
 
 /// ```
-/// let rasterizer = ab_glyph_rasterizer::Rasterizer::new(3, 4);
+/// # use speedy2d::rusttype::rasterizer::Rasterizer;
+/// let rasterizer = Rasterizer::new(3, 4);
 /// assert_eq!(
 ///     &format!("{:?}", rasterizer),
 ///     "Rasterizer { width: 3, height: 4 }"

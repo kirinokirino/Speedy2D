@@ -85,13 +85,18 @@ impl TexturePacker {
         }
 
         let best_area = best_area.ok_or(NotEnoughSpace)?;
-        let URect { top_left, .. } = best_area.rect;
-        let bottom_right = top_left + size;
-        let alloc_area_with_border = URect::new(top_left, bottom_right);
+        let URect {
+            top_left,
+            bottom_right,
+        } = best_area.rect;
 
-        let space_underneath = URect::new(UVec2::new(top_left.x, bottom_right.y), bottom_right);
-        let top_right = UVec2::new(bottom_right.x, top_left.y);
-        let space_right = URect::new(UVec2::new(bottom_right.x, top_left.y), top_right);
+        let space_underneath =
+            URect::new(UVec2::new(top_left.x, (top_left + size).y), bottom_right);
+
+        let space_right = URect::new(
+            UVec2::new((top_left + size).x, top_left.y),
+            space_underneath.top_right(),
+        );
 
         if space_right.is_zero_area() {
             best_area.rect = space_underneath
@@ -106,7 +111,7 @@ impl TexturePacker {
 
         Ok(URect::new(
             top_left + UVec2::new(1, 1),
-            bottom_right - UVec2::new(1, 1),
+            (top_left + size) - UVec2::new(1, 1),
         ))
     }
 }

@@ -26,7 +26,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::vec::IntoIter;
 
 use crate::rusttype::font::RusttypeFont;
-use crate::rusttype::{self, Glyph, GlyphId, PositionedGlyph, Scale, ScaledGlyph};
+use crate::rusttype::{Glyph, GlyphId, PositionedGlyph, Scale, ScaledGlyph};
 use smallvec::{smallvec, SmallVec};
 use unicode_normalization::UnicodeNormalization;
 
