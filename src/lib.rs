@@ -296,6 +296,9 @@ use std::fmt::{Display, Formatter};
 use std::marker::PhantomData;
 use std::rc::Rc;
 
+use glam::{UVec2, Vec2};
+use glam_rect::{IRect, Rect};
+
 #[cfg(any(feature = "image-loading", doc, doctest))]
 use {
     crate::image::ImageFileFormat,
@@ -303,19 +306,23 @@ use {
     std::path::Path,
 };
 
-use crate::color::Color;
-use crate::error::{BacktraceError, ErrorMessage};
 #[cfg(feature = "text")]
 use crate::font::FormattedTextBlock;
-use crate::glbackend::GLBackend;
+
 #[cfg(not(target_arch = "wasm32"))]
 use crate::glbackend::{GLBackendGLRS, GLBackendGlow};
+
+#[cfg(target_arch = "wasm32")]
+use crate::web::WebCanvasElement;
+
+use crate::color::Color;
+use crate::error::{BacktraceError, ErrorMessage};
+use crate::glbackend::GLBackend;
 use crate::glwrapper::{GLContextManager, GLVersion};
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
 use crate::renderer2d::Renderer2D;
 use crate::shape::Polygon;
-#[cfg(target_arch = "wasm32")]
-use crate::web::WebCanvasElement;
+
 #[cfg(any(doc, doctest, feature = "windowing"))]
 use crate::window::WindowHandler;
 #[cfg(any(doc, doctest, all(feature = "windowing", not(target_arch = "wasm32"))))]
@@ -332,30 +339,19 @@ use crate::window_internal_doctest::{WebCanvasImpl, WindowGlutin};
 use crate::window_internal_glutin::WindowGlutin;
 #[cfg(all(feature = "windowing", target_arch = "wasm32", not(any(doc, doctest))))]
 use crate::window_internal_web::WebCanvasImpl;
-use glam::{UVec2, Vec2};
-use glam_rect::{IRect, Rect};
 
-/// Types representing colors.
 pub mod color;
-
-/// Types representing shapes.
-pub mod shape;
-
-/// Components for loading fonts and laying out text.
-#[cfg(feature = "text")]
-pub mod font;
-
-/// Utilities and traits for numeric values.
-pub mod numeric;
-
-/// Error types.
 pub mod error;
-
-/// Types relating to images.
 pub mod image;
-
+pub mod shape;
 /// Utilities for accessing the system clock on all platforms.
 pub mod time;
+
+mod glbackend;
+mod glwrapper;
+mod renderer2d;
+mod texture_packer;
+mod utils;
 
 /// Allows for the creation and management of windows.
 #[cfg(any(doc, doctest, feature = "windowing"))]
@@ -377,13 +373,11 @@ mod window_internal_doctest;
 #[cfg(any(target_arch = "wasm32"))]
 mod web;
 
+/// Components for loading fonts and laying out text.
+#[cfg(feature = "text")]
+pub mod font;
 #[cfg(feature = "text")]
 mod font_cache;
-mod glbackend;
-mod glwrapper;
-mod renderer2d;
-mod texture_packer;
-mod utils;
 
 /// An error encountered during the creation of a [GLRenderer].
 #[derive(Clone, Debug)]

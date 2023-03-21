@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-use crate::texture_packer::TexturePackerError::NotEnoughSpace;
 use glam::UVec2;
 use glam_rect::URect;
 
@@ -84,7 +83,7 @@ impl TexturePacker {
             }
         }
 
-        let best_area = best_area.ok_or(NotEnoughSpace)?;
+        let best_area = best_area.ok_or(TexturePackerError::NotEnoughSpace)?;
         let URect {
             top_left,
             bottom_right,
@@ -145,7 +144,10 @@ mod test {
             packer.try_allocate(UVec2::new(30, 30))
         );
 
-        assert_eq!(Err(NotEnoughSpace), packer.try_allocate(UVec2::new(30, 30)));
+        assert_eq!(
+            Err(TexturePackerError::NotEnoughSpace),
+            packer.try_allocate(UVec2::new(30, 30))
+        );
     }
 
     #[test]
@@ -172,7 +174,10 @@ mod test {
             packer.try_allocate(UVec2::new(28, 28))
         );
 
-        assert_eq!(Err(NotEnoughSpace), packer.try_allocate(UVec2::new(30, 30)));
+        assert_eq!(
+            Err(TexturePackerError::NotEnoughSpace),
+            packer.try_allocate(UVec2::new(30, 30))
+        );
     }
 
     #[test]

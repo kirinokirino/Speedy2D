@@ -262,9 +262,9 @@ impl LineLayoutMetrics {
         if self.last_font_id != Some(font_id) {
             let v_metrics = glyph.font().v_metrics(*scale);
 
-            self.max_ascent = crate::numeric::max(self.max_ascent, v_metrics.ascent);
-            self.min_descent = crate::numeric::min(self.min_descent, v_metrics.descent);
-            self.max_line_gap = crate::numeric::max(self.max_line_gap, v_metrics.line_gap);
+            self.max_ascent = self.max_ascent.max(v_metrics.ascent);
+            self.min_descent = self.min_descent.min(v_metrics.descent);
+            self.max_line_gap = self.max_line_gap.max(v_metrics.line_gap);
         }
 
         let advance_width = glyph.h_metrics().advance_width;
@@ -482,7 +482,7 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
     let mut pos_y = 0.0;
     let mut lines = SmallVec::new();
 
-    let mut width = 0.0;
+    let mut width: f32 = 0.0;
 
     while iterator.has_next() {
         let mut line = layout_line_internal(layout_helper, &mut iterator, &scale, &options, pos_y);
@@ -501,7 +501,7 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
             pos_y += line.line_gap * options.line_spacing_multiplier;
         }
 
-        width = crate::numeric::max(width, line.width);
+        width = width.max(line.width);
 
         lines.push(Rc::new(line));
     }
