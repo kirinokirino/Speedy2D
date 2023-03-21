@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 
-use crate::shape::URect;
 use crate::texture_packer::TexturePackerError::NotEnoughSpace;
 use glam::UVec2;
+use glam_rect::URect;
 
 #[derive(Debug)]
 struct FreeRegion {

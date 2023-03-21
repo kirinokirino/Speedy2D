@@ -27,9 +27,9 @@ use crate::font::FormattedGlyph;
 use crate::glwrapper::{GLContextManager, GLTexture, GLTextureImageFormatU8, GLTextureSmoothing};
 use crate::renderer2d::{Renderer2DAction, Renderer2DVertex};
 use crate::rusttype::{GlyphId, PositionedGlyph, Scale};
-use crate::shape::{Rect, URect};
 use crate::texture_packer::{TexturePacker, TexturePackerError};
 use glam::{vec2, IVec2, UVec2, Vec2};
+use glam_rect::{Rect, URect};
 
 #[repr(transparent)]
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]

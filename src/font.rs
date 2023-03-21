@@ -31,8 +31,8 @@ use smallvec::{smallvec, SmallVec};
 use unicode_normalization::UnicodeNormalization;
 
 use crate::error::{BacktraceError, ErrorMessage};
-use crate::shape::Rect;
 use glam::{vec2, Vec2};
+use glam_rect::Rect;
 
 static FONT_ID_GENERATOR: AtomicUsize = AtomicUsize::new(10000);
 
@@ -868,8 +868,8 @@ impl FormattedGlyph {
     pub fn pixel_bounding_box(&self) -> Option<Rect> {
         self.glyph.pixel_bounding_box().map(|r| {
             Rect::from_tuples(
-                (r.top_left.x as f32, r.top_left.y as f32),
-                (r.bottom_right.x as f32, r.bottom_right.y as f32),
+                (r.top_left.x, r.top_left.y),
+                (r.bottom_right.x, r.bottom_right.y),
             )
         })
     }

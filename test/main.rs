@@ -22,13 +22,14 @@ compile_error!("The automated tests currently support Linux x86_64 only");
 use std::convert::TryInto;
 
 use glam::{UVec2, Vec2};
+use glam_rect::{IRect, Rect};
 use glutin::dpi::PhysicalSize;
 use glutin::event_loop::EventLoop;
 use image::{ColorType, GenericImageView, ImageFormat};
 use speedy2d::color::Color;
 use speedy2d::font::{Font, TextAlignment, TextLayout, TextOptions};
 use speedy2d::image::{ImageDataType, ImageSmoothingMode};
-use speedy2d::shape::{IRect, Polygon, Rect};
+use speedy2d::shape::Polygon;
 use speedy2d::GLRenderer;
 
 const NOTO_SANS_REGULAR_BYTES: &[u8] = include_bytes!("../assets/fonts/NotoSans-Regular.ttf");

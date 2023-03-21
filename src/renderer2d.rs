@@ -34,8 +34,9 @@ use crate::font_cache::GlyphCache;
 use crate::glwrapper::*;
 use crate::image::RawBitmapData;
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode};
-use crate::shape::{IRect, Polygon, Rect};
+use crate::shape::Polygon;
 use glam::{UVec2, Vec2};
+use glam_rect::{IRect, Rect};
 
 struct AttributeBuffers {
     position: Vec<f32>,

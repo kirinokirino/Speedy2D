@@ -3,8 +3,8 @@ pub mod outliner;
 pub mod rasterizer;
 
 use crate::rusttype::font::RusttypeFont;
-use crate::shape::Rect;
 use glam::{vec2, Vec2};
+use glam_rect::Rect;
 
 use core::fmt;
 pub use owned_ttf_parser::OutlineBuilder;
@@ -309,7 +309,7 @@ impl<'font> PositionedGlyph<'font> {
             return false;
         };
 
-        let offset = vec2(bb.top_left.x as f32, bb.top_left.y as f32);
+        let offset = vec2(bb.top_left.x, bb.top_left.y);
 
         let mut outliner = outliner::OutlineTranslator::new(builder, self.position - offset);
 
@@ -359,8 +359,8 @@ impl<'font> PositionedGlyph<'font> {
         if p_diff.x.fract().is_near_zero() && p_diff.y.fract().is_near_zero() {
             if let Some(bb) = self.bb.as_mut() {
                 let rounded_diff = vec2(p_diff.x.round(), p_diff.y.round());
-                bb.top_left = bb.top_left + rounded_diff;
-                bb.bottom_right = bb.bottom_right + rounded_diff;
+                bb.top_left += rounded_diff;
+                bb.bottom_right += rounded_diff;
             }
         } else {
             self.bb = self.sg.pixel_bounds_at(p);

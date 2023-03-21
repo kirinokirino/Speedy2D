@@ -28,6 +28,7 @@ text = ["owned_ttf_parser", "unicode-normalization"]
 gl = "0.14"
 glow = "0.7"
 glam = "0.23.0"
+glam_rect = { version = "0.1.0", path = "../../glam_rect" }  
 log = "0.4"
 num-traits = "0.2"
 earcutr = "0.4.1"

@@ -313,7 +313,7 @@ use crate::glbackend::{GLBackendGLRS, GLBackendGlow};
 use crate::glwrapper::{GLContextManager, GLVersion};
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
 use crate::renderer2d::Renderer2D;
-use crate::shape::{IRect, Polygon, Rect};
+use crate::shape::Polygon;
 #[cfg(target_arch = "wasm32")]
 use crate::web::WebCanvasElement;
 #[cfg(any(doc, doctest, feature = "windowing"))]
@@ -333,6 +333,7 @@ use crate::window_internal_glutin::WindowGlutin;
 #[cfg(all(feature = "windowing", target_arch = "wasm32", not(any(doc, doctest))))]
 use crate::window_internal_web::WebCanvasImpl;
 use glam::{UVec2, Vec2};
+use glam_rect::{IRect, Rect};
 
 /// Types representing colors.
 pub mod color;
