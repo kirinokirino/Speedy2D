@@ -25,8 +25,8 @@ use std::slice::Iter;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::vec::IntoIter;
 
-use crate::rusttype::font::RusttypeFont;
-use crate::rusttype::{Glyph, GlyphId, PositionedGlyph, Scale, ScaledGlyph};
+use glam_rusttype::font::RusttypeFont;
+use glam_rusttype::{Glyph, GlyphId, PositionedGlyph, Scale, ScaledGlyph};
 use smallvec::{smallvec, SmallVec};
 use unicode_normalization::UnicodeNormalization;
 

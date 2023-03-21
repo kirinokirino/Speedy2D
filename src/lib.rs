@@ -344,8 +344,6 @@ pub mod shape;
 /// Components for loading fonts and laying out text.
 #[cfg(feature = "text")]
 pub mod font;
-#[cfg(feature = "text")]
-pub mod rusttype;
 
 /// Utilities and traits for numeric values.
 pub mod numeric;

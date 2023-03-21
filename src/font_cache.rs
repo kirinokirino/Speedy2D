@@ -26,10 +26,10 @@ use crate::error::{BacktraceError, Context, ErrorMessage};
 use crate::font::FormattedGlyph;
 use crate::glwrapper::{GLContextManager, GLTexture, GLTextureImageFormatU8, GLTextureSmoothing};
 use crate::renderer2d::{Renderer2DAction, Renderer2DVertex};
-use crate::rusttype::{GlyphId, PositionedGlyph, Scale};
 use crate::texture_packer::{TexturePacker, TexturePackerError};
 use glam::{vec2, IVec2, UVec2, Vec2};
 use glam_rect::{Rect, URect};
+use glam_rusttype::{GlyphId, PositionedGlyph, Scale};
 
 #[repr(transparent)]
 #[derive(Debug, Hash, Eq, PartialEq, Clone)]

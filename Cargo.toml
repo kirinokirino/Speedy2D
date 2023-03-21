@@ -22,7 +22,7 @@ windowing = ["glutin"]
 windowing-x11 = ["glutin/x11"]
 windowing-wayland = ["glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
 backtrace = ["dep:backtrace"]
-text = ["owned_ttf_parser", "unicode-normalization"]
+text = ["glam_rusttype", "unicode-normalization"]
 
 [dependencies]
 gl = "0.14"
@@ -38,8 +38,8 @@ smallvec = "1.10.0"
 backtrace = { version = "0.3", optional = true }
 
 # For text feature
-owned_ttf_parser = { version = "0.18.1", optional = true }
 unicode-normalization = { version = "0.1", optional = true }
+glam_rusttype = { version = "0.1.0", path = "../../glam_rusttype", optional = true }
 
 # For image_loading feature
 image = { version = "0.23", optional = true }
