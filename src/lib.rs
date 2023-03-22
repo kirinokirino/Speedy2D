@@ -350,7 +350,6 @@ pub mod time;
 mod glbackend;
 mod glwrapper;
 mod renderer2d;
-mod texture_packer;
 mod utils;
 
 /// Allows for the creation and management of windows.

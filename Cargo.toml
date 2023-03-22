@@ -24,13 +24,13 @@ windowing = ["glutin"]
 windowing-x11 = ["glutin/x11"]
 windowing-wayland = ["glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
 backtrace = ["dep:backtrace"]
-text = ["glam_rusttype", "unicode-normalization"]
+text = ["glam_rusttype", "unicode-normalization", "basic_rect_packer"]
 
 [dependencies]
 gl = "0.14"
 glow = "0.7"
 glam = "0.23.0"
-glam_rect = { version = "0.1.0", path = "../../glam_rect" }  
+glam_rect = { version = "0.1.0", path = "../../glam_rect" }
 log = "0.4"
 num-traits = "0.2"
 earcutr = "0.4.1"
@@ -42,6 +42,7 @@ backtrace = { version = "0.3", optional = true }
 # For text feature
 unicode-normalization = { version = "0.1", optional = true }
 glam_rusttype = { version = "0.1.0", path = "../../glam_rusttype", optional = true }
+basic_rect_packer = { version = "0.1.0", path = "../../basic_rect_packer", optional = true }
 
 # For image_loading feature
 image = { version = "0.23", default-features = false, optional = true }

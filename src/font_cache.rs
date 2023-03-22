@@ -26,7 +26,8 @@ use crate::error::{BacktraceError, Context, ErrorMessage};
 use crate::font::FormattedGlyph;
 use crate::glwrapper::{GLContextManager, GLTexture, GLTextureImageFormatU8, GLTextureSmoothing};
 use crate::renderer2d::{Renderer2DAction, Renderer2DVertex};
-use crate::texture_packer::{TexturePacker, TexturePackerError};
+
+use basic_rect_packer::{Packer, PackerError};
 use glam::{vec2, IVec2, UVec2, Vec2};
 use glam_rect::{Rect, URect};
 use glam_rusttype::{GlyphId, PositionedGlyph, Scale};
@@ -564,7 +565,7 @@ struct GlyphCacheTexture {
     texture: GLTexture,
     invalidated: bool,
 
-    packer: TexturePacker,
+    packer: Packer,
 
     entries: HashMap<GlyphCacheKey, GlyphTextureCacheEntry>,
 }
@@ -584,10 +585,10 @@ impl Display for GlyphCacheTextureAppendError {
 
 impl std::error::Error for GlyphCacheTextureAppendError {}
 
-impl From<TexturePackerError> for GlyphCacheTextureAppendError {
-    fn from(value: TexturePackerError) -> Self {
+impl From<PackerError> for GlyphCacheTextureAppendError {
+    fn from(value: PackerError) -> Self {
         match value {
-            TexturePackerError::NotEnoughSpace => GlyphCacheTextureAppendError::NotEnoughSpace,
+            PackerError::NotEnoughSpace => GlyphCacheTextureAppendError::NotEnoughSpace,
         }
     }
 }
@@ -605,7 +606,7 @@ impl GlyphCacheTexture {
 
             invalidated: false,
 
-            packer: TexturePacker::new(GlyphCacheTexture::SIZE, GlyphCacheTexture::SIZE),
+            packer: Packer::new(GlyphCacheTexture::SIZE, GlyphCacheTexture::SIZE),
 
             entries: HashMap::new(),
         })
@@ -614,7 +615,7 @@ impl GlyphCacheTexture {
     fn clear(&mut self) {
         self.invalidated = false;
 
-        self.packer = TexturePacker::new(GlyphCacheTexture::SIZE, GlyphCacheTexture::SIZE);
+        self.packer = Packer::new(GlyphCacheTexture::SIZE, GlyphCacheTexture::SIZE);
 
         self.entries.clear();
 
