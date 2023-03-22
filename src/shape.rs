@@ -54,39 +54,3 @@ impl Polygon {
         Polygon { triangles }
     }
 }
-
-#[cfg(test)]
-mod test {
-    use glam_rect::Rect;
-
-    #[test]
-    pub fn test_intersect_1() {
-        let r1 = Rect::from_tuples((100.0, 100.0), (200.0, 200.0));
-        let r2 = Rect::from_tuples((100.0, 300.0), (200.0, 400.0));
-        let r3 = Rect::from_tuples((125.0, 50.0), (175.0, 500.0));
-
-        assert_eq!(None, r1.intersect(&r2));
-
-        assert_eq!(
-            Some(Rect::from_tuples((125.0, 100.0), (175.0, 200.0))),
-            r1.intersect(&r3)
-        );
-
-        assert_eq!(
-            Some(Rect::from_tuples((125.0, 300.0), (175.0, 400.0))),
-            r2.intersect(&r3)
-        );
-
-        assert_eq!(Some(r1.clone()), r1.intersect(&r1));
-        assert_eq!(Some(r2.clone()), r2.intersect(&r2));
-        assert_eq!(Some(r3.clone()), r3.intersect(&r3));
-    }
-
-    #[test]
-    pub fn test_intersect_2() {
-        let r1 = Rect::from_tuples((100.0, 100.0), (200.0, 200.0));
-        let r2 = Rect::from_tuples((100.0, 200.0), (200.0, 300.0));
-
-        assert_eq!(None, r1.intersect(&r2));
-    }
-}
