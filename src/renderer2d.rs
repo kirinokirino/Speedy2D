@@ -16,6 +16,8 @@
 
 use std::rc::Rc;
 
+#[cfg(feature = "text")]
+use glam_rect::Rect;
 #[cfg(any(feature = "image-loading", doc, doctest))]
 use {
     crate::image::ImageFileFormat,
@@ -34,9 +36,8 @@ use crate::font_cache::GlyphCache;
 use crate::glwrapper::*;
 use crate::image::RawBitmapData;
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode};
-use crate::shape::Polygon;
 use glam::{UVec2, Vec2};
-use glam_rect::{IRect, Rect};
+use glam_rect::IRect;
 
 struct AttributeBuffers {
     position: Vec<f32>,
@@ -922,23 +923,6 @@ impl Renderer2D {
 
         if self.render_queue.len() > 100000 {
             self.flush_render_queue();
-        }
-    }
-
-    #[inline]
-    pub(crate) fn draw_polygon<V: Into<Vec2>>(
-        &mut self,
-        polygon: &Polygon,
-        offset: V,
-        color: Color,
-    ) {
-        let color = [color; 3];
-        let offset = offset.into();
-
-        for triangle in polygon.triangles.iter() {
-            let triangle = triangle.map(|vertex| vertex + offset);
-
-            self.draw_triangle_three_color(triangle, color);
         }
     }
 

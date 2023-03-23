@@ -16,6 +16,26 @@
 
 use glam::Vec2;
 
+use crate::{color::Color, renderer2d::Renderer2D};
+impl Renderer2D {
+    #[inline]
+    pub(crate) fn draw_polygon<V: Into<Vec2>>(
+        &mut self,
+        polygon: &Polygon,
+        offset: V,
+        color: Color,
+    ) {
+        let color = [color; 3];
+        let offset = offset.into();
+
+        for triangle in polygon.triangles.iter() {
+            let triangle = triangle.map(|vertex| vertex + offset);
+
+            self.draw_triangle_three_color(triangle, color);
+        }
+    }
+}
+
 /// A struct representing a polygon.
 #[derive(Debug, Clone)]
 pub struct Polygon {

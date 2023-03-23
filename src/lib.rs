@@ -321,7 +321,8 @@ use crate::glbackend::GLBackend;
 use crate::glwrapper::{GLContextManager, GLVersion};
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
 use crate::renderer2d::Renderer2D;
-use crate::shape::Polygon;
+#[cfg(feature = "shapes")]
+use crate::shapes::Polygon;
 
 #[cfg(any(doc, doctest, feature = "windowing"))]
 use crate::window::WindowHandler;
@@ -343,7 +344,8 @@ use crate::window_internal_web::WebCanvasImpl;
 pub mod color;
 pub mod error;
 pub mod image;
-pub mod shape;
+#[cfg(feature = "shapes")]
+pub mod shapes;
 /// Utilities for accessing the system clock on all platforms.
 pub mod time;
 
@@ -779,6 +781,7 @@ impl Graphics2D {
 
     /// Draws a polygon with a single color, with the specified offset in
     /// pixels.
+    #[cfg(feature = "shapes")]
     pub fn draw_polygon<V: Into<Vec2>>(&mut self, polygon: &Polygon, offset: V, color: Color) {
         self.renderer.draw_polygon(polygon, offset, color)
     }

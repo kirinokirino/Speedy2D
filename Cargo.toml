@@ -17,6 +17,7 @@ documentation = "https://docs.rs/speedy2d"
 
 [features]
 default = ["windowing", "windowing-x11"]
+shapes = []
 image-loading = ["image"]
 image-png = ["image/png"]
 image-jpeg = ["image/jpeg"]
@@ -77,8 +78,10 @@ features = [
 name = "test"
 path = "test/main.rs"
 harness = false
+required-features = ["text", "shapes", "image-loading", "image-png"]
 
 [dev-dependencies]
+speedy2d = { path = ".", features = ["text", "image-loading", "image-png"] }
 simple_logger = { version = "1.11", default-features = false, features = ["colors"] }
 image = { version = "0.23" }
 
@@ -92,11 +95,11 @@ wasm-bindgen = { version = "0.2" }
 
 [[example]]
 name = "hello_world"
-required-features = ["windowing"]
+required-features = ["windowing", "text"]
 
 [[example]]
 name = "managing_context"
-required-features = ["windowing"]
+required-features = ["windowing", "text"]
 
 [[example]]
 name = "user_events"
@@ -116,11 +119,11 @@ required-features = ["windowing", "image-loading"]
 
 [[example]]
 name = "mouse_grab"
-required-features = ["windowing"]
+required-features = ["windowing", "text"]
 
 [[example]]
 name = "moving_text"
-required-features = ["windowing"]
+required-features = ["windowing", "text"]
 
 #[workspace]
 #members = [
