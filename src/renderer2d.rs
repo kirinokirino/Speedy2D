@@ -29,13 +29,18 @@ use {
 
 use crate::color::Color;
 use crate::error::{BacktraceError, Context, ErrorMessage};
+use crate::glwrapper::*;
+
 #[cfg(feature = "text")]
 use crate::font::{FormattedGlyph, FormattedTextBlock};
 #[cfg(feature = "text")]
 use crate::font_cache::GlyphCache;
-use crate::glwrapper::*;
+
+#[cfg(feature = "image-loading")]
 use crate::image::RawBitmapData;
+#[cfg(feature = "image-loading")]
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode};
+
 use glam::{UVec2, Vec2};
 use glam_rect::IRect;
 
@@ -798,6 +803,7 @@ impl Renderer2D {
         );
     }
 
+    #[cfg(feature = "image-loading")]
     pub(crate) fn create_image_from_raw_pixels<S: Into<UVec2>>(
         &self,
         data_type: ImageDataType,
@@ -846,7 +852,7 @@ impl Renderer2D {
         Ok(ImageHandle { size, texture })
     }
 
-    #[cfg(any(feature = "image-loading", doc, doctest))]
+    #[cfg(feature = "image-loading")]
     pub fn create_image_from_file_path<P: AsRef<Path>>(
         &mut self,
         data_type: Option<ImageFileFormat>,
@@ -861,7 +867,7 @@ impl Renderer2D {
         self.create_image_from_file_bytes(data_type, smoothing_mode, BufReader::new(file))
     }
 
-    #[cfg(any(feature = "image-loading", doc, doctest))]
+    #[cfg(feature = "image-loading")]
     pub fn create_image_from_file_bytes<R: Seek + BufRead>(
         &mut self,
         data_type: Option<ImageFileFormat>,
@@ -938,6 +944,7 @@ impl Renderer2D {
         })
     }
 
+    #[cfg(feature = "image-loading")]
     #[inline]
     pub(crate) fn draw_triangle_image_tinted(
         &mut self,
@@ -1027,6 +1034,7 @@ impl Renderer2D {
         }
     }
 
+    #[cfg(feature = "image-loading")]
     pub(crate) fn capture(&mut self, format: ImageDataType) -> RawBitmapData {
         self.flush_render_queue();
         self.context.capture(format)

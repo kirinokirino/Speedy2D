@@ -31,7 +31,10 @@ use crate::glbackend::types::{
     GLuint,
 };
 use crate::glbackend::GLBackend;
+
+#[cfg(feature = "image-loading")]
 use crate::{ImageDataType, RawBitmapData};
+
 use glam::UVec2;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
@@ -559,6 +562,7 @@ pub enum GLTextureImageFormatU8 {
     RGBA,
 }
 
+#[cfg(feature = "image-loading")]
 impl From<ImageDataType> for GLTextureImageFormatU8 {
     fn from(value: ImageDataType) -> Self {
         match value {
@@ -979,6 +983,7 @@ impl GLContextManager {
         self.state.borrow().gl_version
     }
 
+    #[cfg(feature = "image-loading")]
     pub fn capture(&mut self, format: ImageDataType) -> RawBitmapData {
         let viewport_size = match self.state.borrow().viewport_size {
             None => return RawBitmapData::new(vec![], (0, 0), format),

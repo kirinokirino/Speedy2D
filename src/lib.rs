@@ -315,14 +315,17 @@ use crate::glbackend::{GLBackendGLRS, GLBackendGlow};
 #[cfg(target_arch = "wasm32")]
 use crate::web::WebCanvasElement;
 
+#[cfg(feature = "shapes")]
+use crate::shapes::Polygon;
+
+#[cfg(feature = "image-loading")]
+use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
+
 use crate::color::Color;
 use crate::error::{BacktraceError, ErrorMessage};
 use crate::glbackend::GLBackend;
 use crate::glwrapper::{GLContextManager, GLVersion};
-use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
 use crate::renderer2d::Renderer2D;
-#[cfg(feature = "shapes")]
-use crate::shapes::Polygon;
 
 #[cfg(any(doc, doctest, feature = "windowing"))]
 use crate::window::WindowHandler;
@@ -343,16 +346,15 @@ use crate::window_internal_web::WebCanvasImpl;
 
 pub mod color;
 pub mod error;
-pub mod image;
-#[cfg(feature = "shapes")]
-pub mod shapes;
-/// Utilities for accessing the system clock on all platforms.
-pub mod time;
-
 mod glbackend;
 mod glwrapper;
 mod renderer2d;
-mod utils;
+
+#[cfg(feature = "image-loading")]
+pub mod image;
+
+#[cfg(feature = "shapes")]
+pub mod shapes;
 
 /// Allows for the creation and management of windows.
 #[cfg(any(doc, doctest, feature = "windowing"))]
@@ -544,6 +546,7 @@ impl GLRenderer {
     ///
     /// The returned [ImageHandle] is valid only for the current graphics
     /// context.
+    #[cfg(feature = "image-loading")]
     pub fn create_image_from_raw_pixels(
         &mut self,
         data_type: ImageDataType,
@@ -654,6 +657,7 @@ impl Graphics2D {
     ///
     /// The returned [ImageHandle] is valid only for the current graphics
     /// context.
+    #[cfg(feature = "image-loading")]
     pub fn create_image_from_raw_pixels<S: Into<UVec2>>(
         &mut self,
         data_type: ImageDataType,
@@ -813,6 +817,7 @@ impl Graphics2D {
     ///
     /// The vertex positions (and associated colors and image coordinates) must
     /// be provided in clockwise order.
+    #[cfg(feature = "image-loading")]
     pub fn draw_triangle_image_tinted_three_color(
         &mut self,
         vertex_positions_clockwise: [Vec2; 3],
@@ -878,6 +883,7 @@ impl Graphics2D {
     ///
     /// The vertex positions (and associated colors and image coordinates) must
     /// be provided in clockwise order.
+    #[cfg(feature = "image-loading")]
     #[inline]
     pub fn draw_quad_image_tinted_four_color(
         &mut self,
@@ -916,6 +922,7 @@ impl Graphics2D {
     /// The tinting is performed by for each pixel by multiplying each color
     /// component in the image pixel by the corresponding color component in
     /// the `color` parameter.
+    #[cfg(feature = "image-loading")]
     #[inline]
     pub fn draw_rectangle_image_subset_tinted(
         &mut self,
@@ -939,6 +946,7 @@ impl Graphics2D {
     /// The tinting is performed by for each pixel by multiplying each color
     /// component in the image pixel by the corresponding color component in
     /// the `color` parameter.
+    #[cfg(feature = "image-loading")]
     #[inline]
     pub fn draw_rectangle_image_tinted(&mut self, rect: Rect, color: Color, image: &ImageHandle) {
         self.draw_rectangle_image_subset_tinted(
@@ -951,6 +959,7 @@ impl Graphics2D {
 
     /// Draws an image at the specified location. The image will be
     /// scaled to fill the pixel coordinates in the provided rectangle.
+    #[cfg(feature = "image-loading")]
     #[inline]
     pub fn draw_rectangle_image(&mut self, rect: Rect, image: &ImageHandle) {
         self.draw_rectangle_image_tinted(rect, Color::WHITE, image);
@@ -958,6 +967,7 @@ impl Graphics2D {
 
     /// Draws an image at the specified pixel location. The image will be
     /// drawn at its original size with no scaling.
+    #[cfg(feature = "image-loading")]
     #[inline]
     pub fn draw_image<P: Into<Vec2>>(&mut self, position: P, image: &ImageHandle) {
         let position = position.into();
@@ -1116,6 +1126,7 @@ impl Graphics2D {
     /// the color of each pixel. Pixels are represented using a `u8` for each
     /// component (red, green, blue, and alpha). Use the `format` parameter to
     /// specify the byte layout (and size) of each pixel.
+    #[cfg(feature = "image-loading")]
     pub fn capture(&mut self, format: ImageDataType) -> RawBitmapData {
         self.renderer.capture(format)
     }
