@@ -267,7 +267,7 @@ enum RenderQueueItem {
     FormattedTextBlock {
         position: Vec2,
         color: Color,
-        block: Rc<FormattedTextBlock>,
+        block: FormattedTextBlock,
     },
 
     #[cfg(feature = "text")]
@@ -967,8 +967,9 @@ impl Renderer2D {
         &mut self,
         position: V,
         color: Color,
-        text: &Rc<FormattedTextBlock>,
-    ) {
+        text: &FormattedTextBlock
+    )
+    {
         self.add_to_render_queue(RenderQueueItem::FormattedTextBlock {
             position: position.into(),
             color,
@@ -983,8 +984,9 @@ impl Renderer2D {
         position: V,
         crop_window: Rect,
         color: Color,
-        text: &Rc<FormattedTextBlock>,
-    ) {
+        text: &FormattedTextBlock
+    )
+    {
         let position = position.into();
 
         for line in text.iter_lines() {

@@ -19,6 +19,7 @@
 use std::rc::Rc;
 
 use glam::{UVec2, Vec2};
+
 use speedy2d::color::Color;
 use speedy2d::font::{Font, FormattedTextBlock, TextLayout, TextOptions};
 use speedy2d::window::{MouseButton, WindowHandler, WindowHelper, WindowStartupInfo};
@@ -47,7 +48,7 @@ fn main() {
 
 struct MyWindowHandler {
     offset: Vec2,
-    text: Rc<FormattedTextBlock>,
+    text: FormattedTextBlock,
     grabbed: bool,
     window_size: UVec2,
 }

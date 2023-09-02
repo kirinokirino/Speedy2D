@@ -155,7 +155,7 @@ Thanks to [UdHo](https://github.com/UdHo)
 
 ## 1.11.0
 
-## Fixes
+### Fixes
 
 * Fix for issue #74 (in some cases, dropping an `ImageHandle` resulted in a panic)
 
@@ -164,3 +164,26 @@ Thanks to [UdHo](https://github.com/UdHo)
 ### Fixes
 
 * Fix for issue #34 (incorrect alpha compositing on a transparent background)
+
+## 1.13.0
+
+### Changed APIs
+
+* Functions which previously took a `Rectangle` now accept anything which implements
+  `AsRef<Rectangle>`. This allows you to either pass in a reference to a Rectangle,
+  or move the Rectangle as before.
+
+### New APIs
+
+* `WindowHelper.get_size_pixels()` (thanks to [dennisorlando](https://github.com/dennisorlando))
+
+## 2.0.0
+
+### Changed APIs
+
+* APIs which previously returned or accepted an `Rc<FormattedTextBlock>` now use
+  a `FormattedTextBlock` directly
+* `FormattedTextBlock` can now be cheaply cloned, and sent between threads.
+* Removed the deprecated function `new_for_current_context` -- please switch
+  to `new_for_gl_context` instead.
+* `UserEventSender` now implements `Clone` even if the event type doesn't (thanks to [Alex Kladov](https://github.com/matklad))

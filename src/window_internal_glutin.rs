@@ -187,7 +187,15 @@ impl<UserEventType> WindowHelperGlutin<UserEventType> {
             .set_inner_size(PhysicalSize::new(size.x, size.y));
     }
 
-    pub fn set_size_scaled_pixels<S: Into<Vec2>>(&self, size: S) {
+    pub fn get_size_pixels(&self) -> UVec2
+    {
+        let size = self.window_context.window().inner_size();
+
+        UVec2::new(size.width, size.height)
+    }
+
+    pub fn set_size_scaled_pixels<S: Into<Vec2>>(&self, size: S)
+    {
         let size = size.into();
 
         self.window_context
@@ -866,13 +874,25 @@ pub(crate) enum UserEventGlutin<UserEventType: 'static> {
     UserEvent(UserEventType),
 }
 
-#[derive(Clone)]
-pub struct UserEventSenderGlutin<UserEventType: 'static> {
-    event_proxy: EventLoopProxy<UserEventGlutin<UserEventType>>,
+pub struct UserEventSenderGlutin<UserEventType: 'static>
+{
+    event_proxy: EventLoopProxy<UserEventGlutin<UserEventType>>
 }
 
-impl<UserEventType> UserEventSenderGlutin<UserEventType> {
-    fn new(event_proxy: EventLoopProxy<UserEventGlutin<UserEventType>>) -> Self {
+impl<UserEventType> Clone for UserEventSenderGlutin<UserEventType>
+{
+    fn clone(&self) -> Self
+    {
+        UserEventSenderGlutin {
+            event_proxy: self.event_proxy.clone()
+        }
+    }
+}
+
+impl<UserEventType> UserEventSenderGlutin<UserEventType>
+{
+    fn new(event_proxy: EventLoopProxy<UserEventGlutin<UserEventType>>) -> Self
+    {
         Self { event_proxy }
     }
 

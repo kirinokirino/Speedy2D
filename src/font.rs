@@ -20,9 +20,9 @@ use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
 use std::iter::Peekable;
 use std::ops::Deref;
-use std::rc::Rc;
 use std::slice::Iter;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::vec::IntoIter;
 
 use glam_rusttype::font::RusttypeFont;
@@ -47,7 +47,7 @@ pub type UserGlyphIndex = u32;
 pub type FontId = usize;
 
 type FormattedGlyphVec = SmallVec<[FormattedGlyph; 8]>;
-type FormattedTextLineVec = SmallVec<[Rc<FormattedTextLine>; 1]>;
+type FormattedTextLineVec = SmallVec<[FormattedTextLine; 1]>;
 
 /// A struct representing a Unicode codepoint, for the purposes of text layout.
 /// The `user_index` field allows you to determine which output glyph
@@ -458,8 +458,22 @@ fn layout_line_internal<T: TextLayout + ?Sized>(
         line_metrics.max_line_gap = empty_metrics.line_gap;
     }
 
+    if let Some(max_width) = options.wrap_words_after_width {
+        let offset_x = match options.alignment {
+            TextAlignment::Left => None,
+            TextAlignment::Center => Some((max_width - line_metrics.x_pos) / 2.0),
+            TextAlignment::Right => Some(max_width - line_metrics.x_pos)
+        };
+
+        if let Some(offset_x) = offset_x {
+            for glyph in glyphs.iter_mut() {
+                glyph.add_offset_x(offset_x);
+            }
+        }
+    }
+
     FormattedTextLine {
-        glyphs,
+        glyphs: Arc::new(glyphs),
         baseline_vertical_position: pos_y_baseline,
         width: line_metrics.x_pos,
         height: line_metrics.height(),
@@ -473,9 +487,10 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
     layout_helper: &T,
     codepoints: &[Codepoint],
     scale: f32,
-    options: TextOptions,
-) -> Rc<FormattedTextBlock> {
-    let scale = Scale::splat(scale);
+    options: TextOptions
+) -> FormattedTextBlock
+{
+    let scale = Scale::uniform(scale);
 
     let mut iterator = WordsIterator::from(Word::split_words(codepoints));
 
@@ -485,15 +500,8 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
     let mut width: f32 = 0.0;
 
     while iterator.has_next() {
-        let mut line = layout_line_internal(layout_helper, &mut iterator, &scale, &options, pos_y);
-
-        if let Some(max_width) = options.wrap_words_after_width {
-            match options.alignment {
-                TextAlignment::Left => {}
-                TextAlignment::Center => line.add_offset_x((max_width - line.width) / 2.0),
-                TextAlignment::Right => line.add_offset_x(max_width - line.width),
-            }
-        }
+        let line =
+            layout_line_internal(layout_helper, &mut iterator, &scale, &options, pos_y);
 
         pos_y += line.height * options.line_spacing_multiplier;
 
@@ -503,14 +511,14 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
 
         width = width.max(line.width);
 
-        lines.push(Rc::new(line));
+        lines.push(line);
     }
 
-    Rc::new(FormattedTextBlock {
-        lines,
+    FormattedTextBlock {
+        lines: Arc::new(lines),
         width,
-        height: pos_y,
-    })
+        height: pos_y
+    }
 }
 
 /// The vertical metrics of a line of text.
@@ -548,7 +556,13 @@ pub trait TextLayout {
     /// `layout_text_line_from_unindexed_codepoints()`.
     #[inline]
     #[must_use]
-    fn layout_text(&self, text: &str, scale: f32, options: TextOptions) -> Rc<FormattedTextBlock> {
+    fn layout_text(
+        &self,
+        text: &str,
+        scale: f32,
+        options: TextOptions
+    ) -> FormattedTextBlock
+    {
         let codepoints: Vec<char> = text.nfc().collect();
         self.layout_text_from_unindexed_codepoints(codepoints.as_slice(), scale, options)
     }
@@ -565,8 +579,9 @@ pub trait TextLayout {
         &self,
         unindexed_codepoints: &[char],
         scale: f32,
-        options: TextOptions,
-    ) -> Rc<FormattedTextBlock> {
+        options: TextOptions
+    ) -> FormattedTextBlock
+    {
         self.layout_text_from_codepoints(
             Codepoint::from_unindexed_codepoints(unindexed_codepoints).as_slice(),
             scale,
@@ -584,8 +599,9 @@ pub trait TextLayout {
         &self,
         codepoints: &[Codepoint],
         scale: f32,
-        options: TextOptions,
-    ) -> Rc<FormattedTextBlock> {
+        options: TextOptions
+    ) -> FormattedTextBlock
+    {
         layout_multiple_lines_internal(self, codepoints, scale, options)
     }
 
@@ -595,16 +611,11 @@ pub trait TextLayout {
 }
 
 /// A struct representing a font.
-#[repr(transparent)]
 #[derive(Clone)]
-pub struct Font {
-    data: Rc<FontImpl>,
-}
-
-#[derive(Debug)]
-struct FontImpl {
+pub struct Font
+{
     id: usize,
-    font: RusttypeFont<'static>,
+    font: Arc<rusttype::Font<'static>>
 }
 
 impl Font {
@@ -617,21 +628,21 @@ impl Font {
             .ok_or_else(|| ErrorMessage::msg("Failed to load font"))?;
 
         Ok(Font {
-            data: Rc::new(FontImpl {
-                id: FONT_ID_GENERATOR.fetch_add(1, Ordering::SeqCst),
-                font,
-            }),
+            id: FONT_ID_GENERATOR.fetch_add(1, Ordering::SeqCst),
+            font: Arc::new(font)
         })
     }
 
     #[inline]
-    fn id(&self) -> usize {
-        self.data.id
+    fn id(&self) -> usize
+    {
+        self.id
     }
 
     #[inline]
-    fn font(&self) -> &RusttypeFont<'static> {
-        &self.data.font
+    fn font(&self) -> &rusttype::Font<'static>
+    {
+        &self.font
     }
 }
 
@@ -646,15 +657,16 @@ impl TextLayout for FontFamily {
         None
     }
 
-    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics {
-        match Rc::deref(&self.fonts).first() {
+    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics
+    {
+        match Arc::deref(&self.fonts).first() {
             None => LineVerticalMetrics {
                 ascent: 0.0,
                 descent: 0.0,
                 line_gap: 0.0,
             },
             Some(font) => {
-                let metrics = font.data.font.v_metrics(Scale::splat(scale));
+                let metrics = font.font.v_metrics(Scale::uniform(scale));
                 LineVerticalMetrics {
                     ascent: metrics.ascent,
                     descent: metrics.descent,
@@ -679,8 +691,9 @@ impl TextLayout for Font {
         }
     }
 
-    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics {
-        let metrics = self.data.font.v_metrics(Scale::splat(scale));
+    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics
+    {
+        let metrics = self.font.v_metrics(Scale::uniform(scale));
         LineVerticalMetrics {
             ascent: metrics.ascent,
             descent: metrics.descent,
@@ -715,8 +728,9 @@ impl Debug for Font {
 /// text, if a codepoint cannot be found in the first font in the list, the
 /// subsequent fonts will also be searched.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct FontFamily {
-    fonts: Rc<Vec<Font>>,
+pub struct FontFamily
+{
+    fonts: Arc<Vec<Font>>
 }
 
 impl FontFamily {
@@ -725,7 +739,7 @@ impl FontFamily {
     #[must_use]
     pub fn new(fonts: Vec<Font>) -> Self {
         FontFamily {
-            fonts: Rc::new(fonts),
+            fonts: Arc::new(fonts)
         }
     }
 }
@@ -889,8 +903,10 @@ impl FormattedGlyph {
 }
 
 /// Represents a block of text which has been laid out.
-pub struct FormattedTextBlock {
-    lines: FormattedTextLineVec,
+#[derive(Clone)]
+pub struct FormattedTextBlock
+{
+    lines: Arc<FormattedTextLineVec>,
     width: f32,
     height: f32,
 }
@@ -898,7 +914,8 @@ pub struct FormattedTextBlock {
 impl FormattedTextBlock {
     /// Iterate over the lines of text in this block.
     #[inline]
-    pub fn iter_lines(&self) -> Iter<'_, Rc<FormattedTextLine>> {
+    pub fn iter_lines(&self) -> Iter<'_, FormattedTextLine>
+    {
         self.lines.iter()
     }
 
@@ -925,8 +942,10 @@ impl FormattedTextBlock {
 }
 
 /// Represents a line of text which has been laid out as part of a block.
-pub struct FormattedTextLine {
-    glyphs: FormattedGlyphVec,
+#[derive(Clone)]
+pub struct FormattedTextLine
+{
+    glyphs: Arc<FormattedGlyphVec>,
     baseline_vertical_position: f32,
     width: f32,
     height: f32,
@@ -946,9 +965,10 @@ impl FormattedTextLine {
     /// maintaining the same vertical offset).
     #[inline]
     #[must_use]
-    pub fn as_block(self: &Rc<Self>) -> FormattedTextBlock {
+    pub fn as_block(&self) -> FormattedTextBlock
+    {
         FormattedTextBlock {
-            lines: smallvec![self.clone()],
+            lines: Arc::new(smallvec![self.clone()]),
             width: self.width,
             height: self.height,
         }
@@ -1001,12 +1021,6 @@ impl FormattedTextLine {
     #[must_use]
     pub fn baseline_position(&self) -> f32 {
         self.baseline_vertical_position
-    }
-
-    fn add_offset_x(&mut self, offset_x: f32) {
-        for glyph in self.glyphs.iter_mut() {
-            glyph.add_offset_x(offset_x);
-        }
     }
 }
 
