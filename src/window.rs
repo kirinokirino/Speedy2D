@@ -51,13 +51,25 @@ pub enum EventLoopSendError {
 }
 
 /// Allows user events to be sent to the event loop from other threads.
-#[derive(Clone)]
-pub struct UserEventSender<UserEventType: 'static> {
-    inner: UserEventSenderInnerType<UserEventType>,
+pub struct UserEventSender<UserEventType: 'static>
+{
+    inner: UserEventSenderInnerType<UserEventType>
 }
 
-impl<UserEventType> UserEventSender<UserEventType> {
-    pub(crate) fn new(inner: UserEventSenderInnerType<UserEventType>) -> Self {
+impl<UserEventType> Clone for UserEventSender<UserEventType>
+{
+    fn clone(&self) -> Self
+    {
+        UserEventSender {
+            inner: self.inner.clone()
+        }
+    }
+}
+
+impl<UserEventType> UserEventSender<UserEventType>
+{
+    pub(crate) fn new(inner: UserEventSenderInnerType<UserEventType>) -> Self
+    {
         Self { inner }
     }
 
@@ -285,7 +297,7 @@ where
         DrawingWindowHandler {
             window_handler,
             renderer,
-            phantom: PhantomData::default(),
+            phantom: PhantomData
         }
     }
 
@@ -522,6 +534,12 @@ impl<UserEventType> WindowHelper<UserEventType> {
     /// For `WebCanvas`, this function has no effect.
     pub fn set_size_pixels<S: Into<UVec2>>(&self, size: S) {
         self.inner.set_size_pixels(size)
+    }
+
+    /// Gets the window size in pixels.
+    pub fn get_size_pixels(&self) -> UVec2
+    {
+        self.inner.get_size_pixels()
     }
 
     /// Sets the position of the window in pixels. If multiple monitors are in

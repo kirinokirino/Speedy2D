@@ -496,6 +496,10 @@ impl<UserEventType: 'static> WindowHelperWeb<UserEventType> {
     pub fn set_size_pixels<S: Into<UVec2>>(&self, _size: S) {
         // Do nothing
     }
+    pub fn get_size_pixels(&self) -> UVec2
+    {
+        self.canvas.get_canvas_size()
+    }
 
     pub fn set_position_pixels<P: Into<IVec2>>(&self, _position: P) {
         // Do nothing
@@ -525,7 +529,6 @@ impl<UserEventType: 'static> WindowHelperWeb<UserEventType> {
 type UserEventSenderActionType<UserEventType> =
     dyn FnMut(UserEventType) -> Result<(), BacktraceError<ErrorMessage>>;
 
-#[derive(Clone)]
 pub struct UserEventSenderWeb<UserEventType>
 where
     UserEventType: 'static,
@@ -533,8 +536,20 @@ where
     action: Rc<RefCell<UserEventSenderActionType<UserEventType>>>,
 }
 
-impl<UserEventType: 'static> UserEventSenderWeb<UserEventType> {
-    fn new(action: Rc<RefCell<UserEventSenderActionType<UserEventType>>>) -> Self {
+impl<UserEventType: 'static> Clone for UserEventSenderWeb<UserEventType>
+{
+    fn clone(&self) -> Self
+    {
+        UserEventSenderWeb {
+            action: self.action.clone()
+        }
+    }
+}
+
+impl<UserEventType: 'static> UserEventSenderWeb<UserEventType>
+{
+    fn new(action: Rc<RefCell<UserEventSenderActionType<UserEventType>>>) -> Self
+    {
         Self { action }
     }
 

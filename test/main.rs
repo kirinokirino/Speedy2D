@@ -20,6 +20,7 @@
 compile_error!("The automated tests currently support Linux x86_64 only");
 
 use std::convert::TryInto;
+use std::sync::mpsc::channel;
 
 use glam::{UVec2, Vec2};
 use glam_rect::{IRect, Rect};
@@ -159,6 +160,34 @@ fn main() {
     let event_loop = EventLoop::new();
 
     let mut tests = Vec::new();
+
+    tests.push(GLTest {
+        width: 500,
+        height: 500,
+        name: "issue_90_pass_text_between_threads".to_string(),
+        action: Box::new(|renderer| {
+            let typeface = Font::new(NOTO_SANS_REGULAR_BYTES).unwrap();
+
+            let (send, recv) = channel();
+
+            std::thread::spawn(move || {
+                let text = typeface.layout_text(
+                    "The quick brown föx jumped over the lazy dog!",
+                    64.0,
+                    TextOptions::new().with_wrap_to_width(300.0, TextAlignment::Center)
+                );
+
+                send.send(text).unwrap();
+            });
+
+            let text = recv.recv().unwrap();
+
+            renderer.draw_frame(|graphics| {
+                graphics.clear_screen(Color::WHITE);
+                graphics.draw_text(Vec2::new(0.0, 0.0), Color::BLACK, &text);
+            });
+        })
+    });
 
     #[cfg(feature = "image-loading")]
     tests.push(GLTest {
@@ -311,13 +340,17 @@ fn main() {
             renderer.draw_frame(|graphics| {
                 graphics.clear_screen(Color::BLUE);
 
+                // Moves the rectangle
                 graphics.draw_rectangle(
                     Rect::from_tuples((10.0, 20.0), (30.0, 40.0)),
                     Color::MAGENTA,
                 );
 
-                graphics
-                    .draw_rectangle(Rect::from_tuples((15.0, 30.0), (49.0, 48.0)), Color::GREEN);
+                // Passes a reference to the rectangle
+                graphics.draw_rectangle(
+                    &Rectangle::from_tuples((15.0, 30.0), (49.0, 48.0)),
+                    Color::GREEN
+                );
             });
         }),
     });

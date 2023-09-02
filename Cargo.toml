@@ -28,7 +28,6 @@ backtrace = ["dep:backtrace"]
 text = ["glam_rusttype", "unicode-normalization", "basic_rect_packer"]
 
 [dependencies]
-gl = "0.14"
 glow = "0.7"
 glam = "0.23.0"
 glam_rect = { version = "0.1.0", path = "../../glam_rect" }

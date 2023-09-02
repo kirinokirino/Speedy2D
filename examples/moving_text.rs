@@ -16,7 +16,6 @@
 
 #![deny(warnings)]
 
-use std::rc::Rc;
 use std::time::Instant;
 
 use glam::Vec2;
@@ -53,8 +52,8 @@ fn main() {
 }
 
 struct MyWindowHandler {
-    text: Rc<FormattedTextBlock>,
-    start_time: Instant,
+    text: FormattedTextBlock,
+    start_time: Instant
 }
 
 impl WindowHandler for MyWindowHandler {
