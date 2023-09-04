@@ -174,7 +174,7 @@ fn main() {
                 let text = typeface.layout_text(
                     "The quick brown föx jumped over the lazy dog!",
                     64.0,
-                    TextOptions::new().with_wrap_to_width(300.0, TextAlignment::Center)
+                    TextOptions::new().with_wrap_to_width(300.0, TextAlignment::Center),
                 );
 
                 send.send(text).unwrap();
@@ -186,7 +186,7 @@ fn main() {
                 graphics.clear_screen(Color::WHITE);
                 graphics.draw_text(Vec2::new(0.0, 0.0), Color::BLACK, &text);
             });
-        })
+        }),
     });
 
     #[cfg(feature = "image-loading")]
@@ -349,7 +349,7 @@ fn main() {
                 // Passes a reference to the rectangle
                 graphics.draw_rectangle(
                     &Rectangle::from_tuples((15.0, 30.0), (49.0, 48.0)),
-                    Color::GREEN
+                    Color::GREEN,
                 );
             });
         }),

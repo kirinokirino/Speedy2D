@@ -967,9 +967,8 @@ impl Renderer2D {
         &mut self,
         position: V,
         color: Color,
-        text: &FormattedTextBlock
-    )
-    {
+        text: &FormattedTextBlock,
+    ) {
         self.add_to_render_queue(RenderQueueItem::FormattedTextBlock {
             position: position.into(),
             color,
@@ -984,9 +983,8 @@ impl Renderer2D {
         position: V,
         crop_window: Rect,
         color: Color,
-        text: &FormattedTextBlock
-    )
-    {
+        text: &FormattedTextBlock,
+    ) {
         let position = position.into();
 
         for line in text.iter_lines() {

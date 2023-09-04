@@ -51,25 +51,20 @@ pub enum EventLoopSendError {
 }
 
 /// Allows user events to be sent to the event loop from other threads.
-pub struct UserEventSender<UserEventType: 'static>
-{
-    inner: UserEventSenderInnerType<UserEventType>
+pub struct UserEventSender<UserEventType: 'static> {
+    inner: UserEventSenderInnerType<UserEventType>,
 }
 
-impl<UserEventType> Clone for UserEventSender<UserEventType>
-{
-    fn clone(&self) -> Self
-    {
+impl<UserEventType> Clone for UserEventSender<UserEventType> {
+    fn clone(&self) -> Self {
         UserEventSender {
-            inner: self.inner.clone()
+            inner: self.inner.clone(),
         }
     }
 }
 
-impl<UserEventType> UserEventSender<UserEventType>
-{
-    pub(crate) fn new(inner: UserEventSenderInnerType<UserEventType>) -> Self
-    {
+impl<UserEventType> UserEventSender<UserEventType> {
+    pub(crate) fn new(inner: UserEventSenderInnerType<UserEventType>) -> Self {
         Self { inner }
     }
 
@@ -297,7 +292,7 @@ where
         DrawingWindowHandler {
             window_handler,
             renderer,
-            phantom: PhantomData
+            phantom: PhantomData,
         }
     }
 
@@ -537,8 +532,7 @@ impl<UserEventType> WindowHelper<UserEventType> {
     }
 
     /// Gets the window size in pixels.
-    pub fn get_size_pixels(&self) -> UVec2
-    {
+    pub fn get_size_pixels(&self) -> UVec2 {
         self.inner.get_size_pixels()
     }
 

@@ -389,8 +389,7 @@ impl WebCanvasElement {
     }
 
     #[cfg(feature = "windowing")]
-    pub fn get_canvas_size(&self) -> UVec2
-    {
+    pub fn get_canvas_size(&self) -> UVec2 {
         let width = self.canvas.width();
         let height = self.canvas.height();
 

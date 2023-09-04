@@ -53,7 +53,7 @@ fn main() {
 
 struct MyWindowHandler {
     text: FormattedTextBlock,
-    start_time: Instant
+    start_time: Instant,
 }
 
 impl WindowHandler for MyWindowHandler {

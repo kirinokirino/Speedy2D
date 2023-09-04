@@ -739,9 +739,8 @@ impl Graphics2D {
         &mut self,
         position: V,
         color: Color,
-        text: &FormattedTextBlock
-    )
-    {
+        text: &FormattedTextBlock,
+    ) {
         self.renderer.draw_text(position, color, text);
     }
 
@@ -759,9 +758,8 @@ impl Graphics2D {
         position: V,
         crop_window: Rect,
         color: Color,
-        text: &FormattedTextBlock
-    )
-    {
+        text: &FormattedTextBlock,
+    ) {
         self.renderer
             .draw_text_cropped(position, crop_window, color, text);
     }
@@ -909,20 +907,29 @@ impl Graphics2D {
     #[inline]
     pub fn draw_rectangle_image_subset_tinted(
         &mut self,
-        rect: impl AsRef<Rectangle>,
+        rect: impl AsRef<Rect>,
         color: Color,
-        image_coords_normalized: impl AsRef<Rectangle>,
-        image: &ImageHandle
-    )
-    {
+        image_coords_normalized: impl AsRef<Rect>,
+        image: &ImageHandle,
+    ) {
         let rect = rect.as_ref();
         let image_coords_normalized = image_coords_normalized.as_ref();
 
         self.draw_quad_image_tinted_four_color(
-            rect.corners(),
+            [
+                rect.top_left,
+                rect.top_right(),
+                rect.bottom_right,
+                rect.bottom_left()
+            ],
             [color, color, color, color],
-            image_coords_normalized.corners(),
-            image,
+            [
+                image_coords_normalized.top_left,
+                image_coords_normalized.top_right(),
+                image_coords_normalized.bottom_right,
+                image_coords_normalized.bottom_left()
+            ],
+            image
         );
     }
 
@@ -937,11 +944,10 @@ impl Graphics2D {
     #[inline]
     pub fn draw_rectangle_image_tinted(
         &mut self,
-        rect: impl AsRef<Rectangle>,
+        rect: impl AsRef<Rect>,
         color: Color,
-        image: &ImageHandle
-    )
-    {
+        image: &ImageHandle,
+    ) {
         self.draw_rectangle_image_subset_tinted(
             rect,
             color,
@@ -954,12 +960,7 @@ impl Graphics2D {
     /// scaled to fill the pixel coordinates in the provided rectangle.
     #[cfg(feature = "image-loading")]
     #[inline]
-    pub fn draw_rectangle_image(
-        &mut self,
-        rect: impl AsRef<Rectangle>,
-        image: &ImageHandle
-    )
-    {
+    pub fn draw_rectangle_image(&mut self, rect: impl AsRef<Rect>, image: &ImageHandle) {
         self.draw_rectangle_image_tinted(rect, Color::WHITE, image);
     }
 
@@ -979,18 +980,17 @@ impl Graphics2D {
     /// Draws a single-color rectangle at the specified location. The
     /// coordinates of the rectangle are specified in pixels.
     #[inline]
-    pub fn draw_rectangle(&mut self, rect: impl AsRef<Rectangle>, color: Color)
-    {
+    pub fn draw_rectangle(&mut self, rect: impl AsRef<Rect>, color: Color) {
         let rect = rect.as_ref();
 
         self.draw_quad(
             [
-                *rect.top_left(),
+                rect.top_left,
                 rect.top_right(),
-                *rect.bottom_right(),
-                rect.bottom_left()
+                rect.bottom_right,
+                rect.bottom_left(),
             ],
-            color
+            color,
         );
     }
 
@@ -1310,7 +1310,7 @@ impl<UserEventType: 'static> WebCanvas<UserEventType> {
         Ok(WebCanvas {
             inner: Some(WebCanvasImpl::new(element_id, handler)?),
             should_cleanup: false,
-            user_event_type: PhantomData
+            user_event_type: PhantomData,
         })
     }
 

@@ -462,7 +462,7 @@ fn layout_line_internal<T: TextLayout + ?Sized>(
         let offset_x = match options.alignment {
             TextAlignment::Left => None,
             TextAlignment::Center => Some((max_width - line_metrics.x_pos) / 2.0),
-            TextAlignment::Right => Some(max_width - line_metrics.x_pos)
+            TextAlignment::Right => Some(max_width - line_metrics.x_pos),
         };
 
         if let Some(offset_x) = offset_x {
@@ -487,10 +487,9 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
     layout_helper: &T,
     codepoints: &[Codepoint],
     scale: f32,
-    options: TextOptions
-) -> FormattedTextBlock
-{
-    let scale = Scale::uniform(scale);
+    options: TextOptions,
+) -> FormattedTextBlock {
+    let scale = Scale::splat(scale);
 
     let mut iterator = WordsIterator::from(Word::split_words(codepoints));
 
@@ -500,8 +499,7 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
     let mut width: f32 = 0.0;
 
     while iterator.has_next() {
-        let line =
-            layout_line_internal(layout_helper, &mut iterator, &scale, &options, pos_y);
+        let line = layout_line_internal(layout_helper, &mut iterator, &scale, &options, pos_y);
 
         pos_y += line.height * options.line_spacing_multiplier;
 
@@ -517,7 +515,7 @@ fn layout_multiple_lines_internal<T: TextLayout + ?Sized>(
     FormattedTextBlock {
         lines: Arc::new(lines),
         width,
-        height: pos_y
+        height: pos_y,
     }
 }
 
@@ -556,13 +554,7 @@ pub trait TextLayout {
     /// `layout_text_line_from_unindexed_codepoints()`.
     #[inline]
     #[must_use]
-    fn layout_text(
-        &self,
-        text: &str,
-        scale: f32,
-        options: TextOptions
-    ) -> FormattedTextBlock
-    {
+    fn layout_text(&self, text: &str, scale: f32, options: TextOptions) -> FormattedTextBlock {
         let codepoints: Vec<char> = text.nfc().collect();
         self.layout_text_from_unindexed_codepoints(codepoints.as_slice(), scale, options)
     }
@@ -579,9 +571,8 @@ pub trait TextLayout {
         &self,
         unindexed_codepoints: &[char],
         scale: f32,
-        options: TextOptions
-    ) -> FormattedTextBlock
-    {
+        options: TextOptions,
+    ) -> FormattedTextBlock {
         self.layout_text_from_codepoints(
             Codepoint::from_unindexed_codepoints(unindexed_codepoints).as_slice(),
             scale,
@@ -599,9 +590,8 @@ pub trait TextLayout {
         &self,
         codepoints: &[Codepoint],
         scale: f32,
-        options: TextOptions
-    ) -> FormattedTextBlock
-    {
+        options: TextOptions,
+    ) -> FormattedTextBlock {
         layout_multiple_lines_internal(self, codepoints, scale, options)
     }
 
@@ -612,10 +602,9 @@ pub trait TextLayout {
 
 /// A struct representing a font.
 #[derive(Clone)]
-pub struct Font
-{
+pub struct Font {
     id: usize,
-    font: Arc<rusttype::Font<'static>>
+    font: Arc<RusttypeFont<'static>>,
 }
 
 impl Font {
@@ -629,19 +618,17 @@ impl Font {
 
         Ok(Font {
             id: FONT_ID_GENERATOR.fetch_add(1, Ordering::SeqCst),
-            font: Arc::new(font)
+            font: Arc::new(font),
         })
     }
 
     #[inline]
-    fn id(&self) -> usize
-    {
+    fn id(&self) -> usize {
         self.id
     }
 
     #[inline]
-    fn font(&self) -> &rusttype::Font<'static>
-    {
+    fn font(&self) -> &RusttypeFont<'static> {
         &self.font
     }
 }
@@ -657,8 +644,7 @@ impl TextLayout for FontFamily {
         None
     }
 
-    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics
-    {
+    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics {
         match Arc::deref(&self.fonts).first() {
             None => LineVerticalMetrics {
                 ascent: 0.0,
@@ -666,7 +652,7 @@ impl TextLayout for FontFamily {
                 line_gap: 0.0,
             },
             Some(font) => {
-                let metrics = font.font.v_metrics(Scale::uniform(scale));
+                let metrics = font.font.v_metrics(Scale::splat(scale));
                 LineVerticalMetrics {
                     ascent: metrics.ascent,
                     descent: metrics.descent,
@@ -691,9 +677,8 @@ impl TextLayout for Font {
         }
     }
 
-    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics
-    {
-        let metrics = self.font.v_metrics(Scale::uniform(scale));
+    fn empty_line_vertical_metrics(&self, scale: f32) -> LineVerticalMetrics {
+        let metrics = self.font.v_metrics(Scale::splat(scale));
         LineVerticalMetrics {
             ascent: metrics.ascent,
             descent: metrics.descent,
@@ -728,9 +713,8 @@ impl Debug for Font {
 /// text, if a codepoint cannot be found in the first font in the list, the
 /// subsequent fonts will also be searched.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct FontFamily
-{
-    fonts: Arc<Vec<Font>>
+pub struct FontFamily {
+    fonts: Arc<Vec<Font>>,
 }
 
 impl FontFamily {
@@ -739,7 +723,7 @@ impl FontFamily {
     #[must_use]
     pub fn new(fonts: Vec<Font>) -> Self {
         FontFamily {
-            fonts: Arc::new(fonts)
+            fonts: Arc::new(fonts),
         }
     }
 }
@@ -904,8 +888,7 @@ impl FormattedGlyph {
 
 /// Represents a block of text which has been laid out.
 #[derive(Clone)]
-pub struct FormattedTextBlock
-{
+pub struct FormattedTextBlock {
     lines: Arc<FormattedTextLineVec>,
     width: f32,
     height: f32,
@@ -914,8 +897,7 @@ pub struct FormattedTextBlock
 impl FormattedTextBlock {
     /// Iterate over the lines of text in this block.
     #[inline]
-    pub fn iter_lines(&self) -> Iter<'_, FormattedTextLine>
-    {
+    pub fn iter_lines(&self) -> Iter<'_, FormattedTextLine> {
         self.lines.iter()
     }
 
@@ -943,8 +925,7 @@ impl FormattedTextBlock {
 
 /// Represents a line of text which has been laid out as part of a block.
 #[derive(Clone)]
-pub struct FormattedTextLine
-{
+pub struct FormattedTextLine {
     glyphs: Arc<FormattedGlyphVec>,
     baseline_vertical_position: f32,
     width: f32,
@@ -965,8 +946,7 @@ impl FormattedTextLine {
     /// maintaining the same vertical offset).
     #[inline]
     #[must_use]
-    pub fn as_block(&self) -> FormattedTextBlock
-    {
+    pub fn as_block(&self) -> FormattedTextBlock {
         FormattedTextBlock {
             lines: Arc::new(smallvec![self.clone()]),
             width: self.width,

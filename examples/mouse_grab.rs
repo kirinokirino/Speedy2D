@@ -16,8 +16,6 @@
 
 #![deny(warnings)]
 
-use std::rc::Rc;
-
 use glam::{UVec2, Vec2};
 
 use speedy2d::color::Color;

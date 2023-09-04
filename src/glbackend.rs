@@ -283,10 +283,8 @@ pub trait GLBackend {
     }
 
     unsafe fn gl_buffer_data_f32(&self, target: GLenum, data: &[f32], usage: GLenum) {
-        let data = std::slice::from_raw_parts(
-            data.as_ptr() as *const u8,
-            std::mem::size_of_val(data)
-        );
+        let data =
+            std::slice::from_raw_parts(data.as_ptr() as *const u8, std::mem::size_of_val(data));
 
         self.gl_buffer_data(target, data, usage)
     }

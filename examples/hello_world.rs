@@ -34,7 +34,7 @@ fn main() {
 }
 
 struct MyWindowHandler {
-    text: FormattedTextBlock
+    text: FormattedTextBlock,
 }
 
 impl WindowHandler for MyWindowHandler {
