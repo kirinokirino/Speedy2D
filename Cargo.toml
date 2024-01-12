@@ -16,7 +16,7 @@ repository = "https://github.com/QuantumBadger/Speedy2D"
 documentation = "https://docs.rs/speedy2d"
 
 [features]
-default = ["windowing", "windowing-x11"]
+default = ["windowing", "windowing-wayland"]
 shapes = []
 image-loading = ["image"]
 image-png = ["image/png"]
