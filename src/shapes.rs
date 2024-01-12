@@ -16,6 +16,8 @@
 
 use glam::Vec2;
 
+pub use crate::glam_rect::{Rect, URect, IRect};
+
 use crate::{color::Color, renderer2d::Renderer2D};
 impl Renderer2D {
     #[inline]
