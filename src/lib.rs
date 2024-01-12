@@ -301,7 +301,7 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 
 use glam::{UVec2, Vec2};
-use glam_rect::{IRect, Rect};
+pub use glam_rect::{IRect, Rect, URect};
 
 #[cfg(any(feature = "image-loading", doc, doctest))]
 use {
@@ -320,7 +320,7 @@ use crate::glbackend::GLBackendGlow;
 use crate::web::WebCanvasElement;
 
 #[cfg(feature = "shapes")]
-use crate::shapes::{Polygon, Rect, IRect, URect};
+use crate::shapes::Polygon;
 
 #[cfg(feature = "image-loading")]
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
