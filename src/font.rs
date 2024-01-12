@@ -77,8 +77,7 @@ impl Codepoint {
     }
 
     fn from_unindexed_codepoints(unindexed_codepoints: &[char]) -> Vec<Self> {
-        let mut codepoints = Vec::new();
-        codepoints.reserve(unindexed_codepoints.len());
+        let mut codepoints = Vec::with_capacity(unindexed_codepoints.len());
 
         for (i, codepoint) in unindexed_codepoints.iter().enumerate() {
             codepoints.push(Codepoint::new(i.try_into().unwrap(), *codepoint));
@@ -135,8 +134,7 @@ impl Word {
                 _ => {
                     // Non-whitespace word
 
-                    let mut word_codepoints = Vec::new();
-                    word_codepoints.reserve(16);
+                    let mut word_codepoints = Vec::with_capacity(16);
                     word_codepoints.push(first_token.clone());
 
                     while let Some(next) = reader.peek() {
@@ -418,12 +416,14 @@ fn layout_line_internal<T: TextLayout + ?Sized>(
 
     let mut first_word_on_line = true;
 
-    // Skip whitespace
-    while let Some(Word::Renderable(word)) = words.peek() {
-        if word.is_whitespace {
-            words.next().unwrap();
-        } else {
-            break;
+    if options.trim_each_line {
+        // Skip whitespace
+        while let Some(Word::Renderable(word)) = words.peek() {
+            if word.is_whitespace {
+                words.next().unwrap();
+            } else {
+                break;
+            }
         }
     }
 
@@ -746,6 +746,7 @@ pub struct TextOptions {
     wrap_words_after_width: Option<f32>,
     alignment: TextAlignment,
     line_spacing_multiplier: f32,
+    trim_each_line: bool,
 }
 
 impl TextOptions {
@@ -758,6 +759,7 @@ impl TextOptions {
             wrap_words_after_width: None,
             alignment: TextAlignment::Left,
             line_spacing_multiplier: 1.0,
+            trim_each_line: true,
         }
     }
 
@@ -798,6 +800,17 @@ impl TextOptions {
     #[must_use]
     pub fn with_line_spacing_multiplier(mut self, line_spacing_multiplier: f32) -> Self {
         self.line_spacing_multiplier = line_spacing_multiplier;
+        self
+    }
+
+    /// True if whitespace should be trimmed at the beginning of each line,
+    /// false to preserve whitespace.
+    ///
+    /// The default is `true`.
+    #[inline]
+    #[must_use]
+    pub fn with_trim_each_line(mut self, trim_each_line: bool) -> Self {
+        self.trim_each_line = trim_each_line;
         self
     }
 }
