@@ -41,8 +41,8 @@ backtrace = { version = "0.3", optional = true }
 
 # For text feature
 unicode-normalization = { version = "0.1", optional = true }
-glam_rusttype = { version = "0.1.0", path = "./glam_rusttype", optional = true }
-basic_rect_packer = { version = "0.1.0", path = "./basic_rect_packer", optional = true }
+glam_rusttype = { version = "0.1.0", git = "https://github.com/kirinokirino/glam_rusttype.git", optional = true }
+basic_rect_packer = { version = "0.1.0", git = "https://github.com/kirinokirino/basic_rect_packer.git", optional = true }
 
 # For image_loading feature
 image = { version = "0.23", default-features = false, optional = true }
