@@ -30,7 +30,7 @@ text = ["glam_rusttype", "unicode-normalization", "basic_rect_packer"]
 [dependencies]
 glow = "0.7"
 glam = "^0.25"
-glam_rect = { version = "0.1.0", path = "./glam_rect" }
+glam_rect = { version = "0.1.0", git = "https://github.com/kirinokirino/glam_rect.git" }
 log = "0.4"
 num-traits = "0.2"
 earcutr = "0.4.1"
