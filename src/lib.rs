@@ -320,7 +320,7 @@ use crate::glbackend::GLBackendGlow;
 use crate::web::WebCanvasElement;
 
 #[cfg(feature = "shapes")]
-use crate::shapes::{Polygon, RoundedRectangle};
+use crate::shapes::Polygon;
 
 #[cfg(feature = "image-loading")]
 use crate::image::{ImageDataType, ImageHandle, ImageSmoothingMode, RawBitmapData};
