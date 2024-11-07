@@ -98,12 +98,6 @@ pub mod constants {
     #[allow(dead_code)]
     pub const GL_INFO_LOG_LENGTH: GLenum = glow::INFO_LOG_LENGTH;
 
-    pub const GL_DEBUG_SEVERITY_HIGH: GLenum = glow::DEBUG_SEVERITY_HIGH;
-    pub const GL_DEBUG_SEVERITY_MEDIUM: GLenum = glow::DEBUG_SEVERITY_MEDIUM;
-    pub const GL_DEBUG_SEVERITY_LOW: GLenum = glow::DEBUG_SEVERITY_LOW;
-    pub const GL_DEBUG_OUTPUT: GLenum = glow::DEBUG_OUTPUT;
-    pub const GL_DEBUG_OUTPUT_SYNCHRONOUS: GLenum = glow::DEBUG_OUTPUT_SYNCHRONOUS;
-
     pub const GL_UNPACK_ALIGNMENT: GLenum = glow::UNPACK_ALIGNMENT;
 }
 
@@ -149,6 +143,7 @@ pub trait GLBackend {
     unsafe fn gl_bind_texture(&self, target: GLenum, handle: GLTypeTexture);
     unsafe fn gl_enable(&self, cap: GLenum);
     unsafe fn gl_disable(&self, cap: GLenum);
+    #[allow(dead_code)]
     unsafe fn gl_blend_func(&self, sfactor: GLenum, dfactor: GLenum);
     unsafe fn gl_blend_func_separate(
         &self,
@@ -172,7 +167,9 @@ pub trait GLBackend {
     unsafe fn gl_draw_arrays(&self, mode: GLenum, first: GLint, count: GLsizei);
     unsafe fn gl_clear_color(&self, r: f32, g: f32, b: f32, a: f32);
     unsafe fn gl_clear(&self, mask: GLenum);
+    #[allow(dead_code)]
     unsafe fn gl_enable_debug_message_callback(&self);
+    #[allow(dead_code)]
     unsafe fn gl_get_string(&self, parameter: GLenum) -> String;
     unsafe fn gl_viewport(&self, x: i32, y: i32, width: i32, height: i32);
     unsafe fn gl_scissor(&self, x: GLint, y: GLint, width: GLsizei, height: GLsizei);
@@ -202,7 +199,7 @@ pub trait GLBackend {
         pixels: Option<&[u8]>,
     );
 
-    #[allow(clippy::too_many_arguments)]
+    #[allow(clippy::too_many_arguments, dead_code)]
     unsafe fn gl_tex_sub_image_2d(
         &self,
         target: GLenum,
@@ -266,6 +263,7 @@ pub trait GLBackend {
         Ok(())
     }
 
+    #[allow(dead_code)]
     fn gl_get_error_name(&self) -> Option<String> {
         let err = unsafe { self.gl_get_error() };
 
@@ -435,16 +433,16 @@ impl GLBackend for GLBackendGlow {
             msg: &str,
         ) {
             match severity {
-                GL_DEBUG_SEVERITY_HIGH => log::error!("GL debug log: {}", msg),
-                GL_DEBUG_SEVERITY_MEDIUM => log::warn!("GL debug log: {}", msg),
-                GL_DEBUG_SEVERITY_LOW => log::info!("GL debug log: {}", msg),
-                _ => log::debug!("GL debug log: {}", msg),
+                glow::DEBUG_SEVERITY_HIGH => log::error!("GL debug log: {}", msg),
+                glow::DEBUG_SEVERITY_MEDIUM => log::warn!("GL debug log: {}", msg),
+                glow::DEBUG_SEVERITY_LOW => log::info!("GL debug log: {}", msg),
+                _ => log::debug!("GL debug log: {}", msg)
             }
         }
 
         self.context.debug_message_callback(gl_log_callback);
-        self.gl_enable(GL_DEBUG_OUTPUT);
-        self.gl_enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        self.gl_enable(glow::DEBUG_OUTPUT);
+        self.gl_enable(glow::DEBUG_OUTPUT_SYNCHRONOUS);
 
         log::info!("GL debug log enabled for glow backend");
     }

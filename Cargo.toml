@@ -21,9 +21,9 @@ shapes = []
 image-loading = ["image"]
 image-png = ["image/png"]
 image-jpeg = ["image/jpeg"]
-windowing = ["glutin"]
+windowing = ["glutin", "winit", "glutin-winit", "raw-window-handle"]
 windowing-x11 = ["glutin/x11"]
-windowing-wayland = ["glutin/wayland", "glutin/wayland-dlopen", "glutin/wayland-csd-adwaita"]
+windowing-wayland = ["glutin/wayland"]
 backtrace = ["dep:backtrace"]
 text = ["glam_rusttype", "unicode-normalization", "basic_rect_packer"]
 
@@ -49,7 +49,10 @@ image = { version = "0.23", default-features = false, optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # For windowing feature
-glutin = { version = "0.29.1", default-features = false, optional = true }
+glutin = { version = "0.31.3", optional = true }
+winit = { version = "0.29.2", optional = true, default-features = false, features = ["rwh_05"] }
+glutin-winit = { version = "0.4.2", optional = true }
+raw-window-handle = { version = "0.5.2", optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = { version = "0.2" }
@@ -85,7 +88,10 @@ simple_logger = { version = "1.11", default-features = false, features = ["color
 image = { version = "0.23" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
-glutin = { version = "0.29.1", default-features = false, features = ["x11"] }
+glutin = "0.31.3"
+winit = { version = "0.29.2", default-features = false, features = ["rwh_05"] }
+glutin-winit = { version = "0.4.2" }
+raw-window-handle = { version = "0.5.2" }
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 wasm-bindgen = { version = "0.2" }

@@ -16,6 +16,7 @@
 
 #![deny(warnings)]
 
+use log::LevelFilter;
 use glam::{UVec2, Vec2};
 use speedy2d::color::Color;
 use speedy2d::window::{
@@ -24,8 +25,9 @@ use speedy2d::window::{
 };
 use speedy2d::{Graphics2D, Window};
 
-fn main() {
-    simple_logger::SimpleLogger::new().init().unwrap();
+fn main()
+{
+    simple_logger::SimpleLogger::new().with_level(LevelFilter::Info).init().unwrap();
 
     let window = Window::new_centered("Speedy2D: Input Callbacks Example", (640, 480)).unwrap();
 
