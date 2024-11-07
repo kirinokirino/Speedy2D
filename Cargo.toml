@@ -29,23 +29,23 @@ text = ["glam_rusttype", "unicode-normalization", "basic_rect_packer"]
 
 [dependencies]
 glow = "0.7"
-glam = "^0.25"
+glam = "0.29"
 glam_rect = { version = "0.1.0", git = "https://github.com/kirinokirino/glam_rect.git" }
 log = "0.4"
 num-traits = "0.2"
-earcutr = "0.4.1"
-smallvec = "1.10.0"
+earcutr = "0.4"
+smallvec = "1.13"
 
 # For backtrace feature
 backtrace = { version = "0.3", optional = true }
 
 # For text feature
 unicode-normalization = { version = "0.1", optional = true }
-glam_rusttype = { version = "0.1.0", git = "https://github.com/kirinokirino/glam_rusttype.git", optional = true }
-basic_rect_packer = { version = "0.1.0", git = "https://github.com/kirinokirino/basic_rect_packer.git", optional = true }
+glam_rusttype = { version = "0.1", git = "https://github.com/kirinokirino/glam_rusttype.git", optional = true }
+basic_rect_packer = { version = "0.1", git = "https://github.com/kirinokirino/basic_rect_packer.git", optional = true }
 
 # For image_loading feature
-image = { version = "0.23", default-features = false, optional = true }
+image = { version = "0.25", default-features = false, optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # For windowing feature
@@ -84,8 +84,8 @@ required-features = ["text", "shapes", "image-loading", "image-png"]
 
 [dev-dependencies]
 speedy2d = { path = ".", features = ["text", "image-loading", "image-png"] }
-simple_logger = { version = "1.11", default-features = false, features = ["colors"] }
-image = { version = "0.23" }
+simple_logger = { version = "5.0", default-features = false, features = ["colors"] }
+image = { version = "0.25" }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 glutin = "0.31.3"
